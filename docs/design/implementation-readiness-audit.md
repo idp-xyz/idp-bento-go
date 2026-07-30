@@ -87,7 +87,7 @@ Audit date: 2026-07-30
 | `B-02` | 精确 Go、`pgx/v5`、OpenTelemetry、apidiff 与 SemVer 解析版本 | 创建代码基线与依赖锁时 | `BOUND`：Go `1.26.5`、pgx `v5.10.0`、OpenTelemetry API `v1.44.0`、`x/exp v0.0.0-20260727155853-b88d891fe743`、`x/mod v0.38.0`；2026-07-29 由官方端点核验，`x/mod` 原已由工具链间接锁定，现由证明校验直接使用 |
 | `B-03` | PostgreSQL 验证主版本范围 | 首个适配器集成测试前 | `BOUND`：`v0.1` 初始支持 major 16；CI 使用最新稳定 16.x，当前证据为 16.12 |
 | `B-04` | 维护者、消费者代表、安全批准者账号 | 开放共享合并与发布候选前 | `UNBOUND IDENTITIES`：公司 Organization `idp-xyz` 已绑定，但真实维护者、消费者代表和安全批准者账号尚未绑定 |
-| `B-05` | CI 平台、跨仓触发与合同证明存储 | 首个跨仓发布候选前 | `CONFIGURATION BOUND / DEPLOYMENT UNVERIFIED`：GitHub Actions、`workflow_dispatch`、职责分离 GitHub App、Artifact 仅传输、三年 Object Lock Compliance、GitHub OIDC、KMS ECDSA P-256、DSSE 与严格 evidence manifest 已确认；框架 repository ID `1315735832` 与 Organization owner ID `311024230` 已核验，真实 workflow、App、Action SHA、runner/container digest、S3/KMS/OIDC 标识和演练证据仍未绑定 |
+| `B-05` | CI 平台、跨仓触发与合同证明存储 | 首个跨仓发布候选前 | `CONFIGURATION BOUND / DEPLOYMENT UNVERIFIED`：GitHub Actions、`workflow_dispatch`、职责分离 GitHub App、Artifact 仅传输、三年 Object Lock Compliance、GitHub OIDC、KMS ECDSA P-256、DSSE 与严格 evidence manifest 已确认；框架 repository ID `1315735832`、Organization owner ID `311024230`、私有可见性和源码提交 `6da1e17e74eeecc9ec120d646642f2f303f4ccbd` 已核验；免费 Organization 不执行私有仓库 Ruleset，Team 账单资料和付款尚未完成，真实 workflow、App、Action SHA、runner/container digest、S3/KMS/OIDC 标识和演练证据仍未绑定 |
 | `B-06` | 首发日期、支持矩阵日期和消费者基线提交 | 首个稳定版本前 | `UNBOUND` |
 
 `go.mod`、稳定核心和 PostgreSQL 本地基线已经创建，Git 仓库地址和 vanity 解析合同已经确认；当前没有剩余架构决定阻断代码加固。`B-01B` 剩余的线上部署验收及 `B-04` 至 `B-06` 分别阻断跨仓获取、共享合并、受保护 CI、发布候选或稳定发布。
@@ -120,6 +120,7 @@ Audit date: 2026-07-30
 - 2026-07-30 公开线上核验确认框架 repository ID `1315735832`、公开可见性和默认分支 `main`；当前 owner ID `310467973` 的类型为个人 `User`，与治理文档原称“GitHub 组织已绑定”冲突，因此组织所有权改为部署阻断项。workflow、Ruleset、Environment 与 tag 均为空，分支保护因未认证只能标记为未验证；`go.idp.xyz` 同时确认为 `NXDOMAIN`，所以 `B-01B` 与 `B-05` 状态不升级。
 - 2026-07-30 登录后的 GitHub 设置页进一步确认当前账号没有 Organization，且个人账号不能转换为 Organization；唯一受支持的治理迁移路径是新建公司 Organization 后转移 `idp-bento-go`。目标名称和新 owner ID 在实际创建前保持 `UNBOUND`。
 - 2026-07-30 创建免费 Organization `idp-xyz` 并完成仓库转移；repository ID 保持 `1315735832`，owner ID 更新为 `311024230`，旧 GitHub URL 自动重定向。迁移后 workflow、Ruleset、Environment、tag 均为 0，默认分支保护明确未配置，因此组织所有权已绑定但发布控制面仍未部署。
+- 2026-07-30 将仓库切换为私有，保留远端 Boost Software License 1.0 初始提交，并把通过本地门禁的 113 个源码与文档文件推送到 `main`；远端提交更新为 `6da1e17e74eeecc9ec120d646642f2f303f4ccbd`。同日使用一次性 PostgreSQL 16.9 容器通过 `candidatecheck -initial-v0-1` 的全部 18 个门禁。Ruleset 页面明确提示免费 Organization 不执行私有仓库规则；Team 升级停在账单资料和付款之前，因此不得把默认分支描述为已保护。
 
 ## 推荐完成顺序
 
@@ -127,8 +128,9 @@ Audit date: 2026-07-30
 2. 已完成：实现 `postgres`、`postgres/outbox`、`postgres/inbox`、不可变迁移、PostgreSQL 编译夹具与三个 API 快照。
 3. 已完成仓库矩阵：在 PostgreSQL 16.12 上执行 `I-04`；受保护 CI 复跑仍依赖 `B-05`。
 4. 已完成仓内候选入口：`candidatecheck` 强制真实 PostgreSQL DSN、无缓存测试和显式初始/旧基线模式。
-5. 下一阶段：部署并验证 `B-01B` 的 vanity 解析并绑定 `B-04` 至 `B-06`，由受保护 CI 调用该入口，创建不可变 RC 并收集 TMS、Parcel 对同一 checksum 的证明。
+5. 已完成私有远端源码基线：保留初始许可证历史，将完整源码推送到 `idp-xyz/idp-bento-go` 的 `main`，并核验远端提交。
+6. 下一阶段：完成 GitHub Team 账单、创建并验证默认分支 Ruleset，再部署 `B-01B` 的 vanity 解析并绑定 `B-04` 至 `B-06`；由受保护 CI 调用候选入口，创建不可变 RC 并收集 TMS、Parcel 对同一 checksum 的证明。
 
 ## 下一步
 
-`v0.1` 本地实现基线、PostgreSQL 16.12 仓库验收、Git 仓库和 vanity 解析合同已经完成。下一推荐阶段是部署解析基础设施并绑定治理身份，建立受保护 CI，在同一不可变 RC 上执行框架、TMS 和 Parcel 的候选合同。
+`v0.1` 实现基线、PostgreSQL 16.12 仓库验收、私有 Git 远端源码基线和 vanity 解析合同已经完成。下一推荐阶段是完成 GitHub Team 账单并建立可执行 Ruleset，然后部署解析基础设施、绑定治理身份和受保护 CI，在同一不可变 RC 上执行框架、TMS 和 Parcel 的候选合同。

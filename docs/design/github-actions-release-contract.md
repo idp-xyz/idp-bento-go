@@ -129,12 +129,12 @@ Object Lock 模式、三年保留、对象前缀、OIDC subject、ECDSA P-256 �
 
 ## 已核验外部事实
 
-2026-07-30 通过 GitHub 公共 API 与 Git transport 完成只读核验：
+2026-07-30 通过 GitHub API、Git transport 与登录后的仓库设置页完成核验：
 
-- 框架仓库 owner/name 为 `idp-xyz/idp-bento-go`，repository ID 为 `1315735832`，Organization owner ID 为 `311024230`，公开可见，默认分支为 `main`。
+- 框架仓库 owner/name 为 `idp-xyz/idp-bento-go`，repository ID 为 `1315735832`，Organization owner ID 为 `311024230`，当前为私有仓库，默认分支为 `main`。
 - 迁移前个人 owner ID 为 `310467973`；GitHub 不支持把个人账号转换为 Organization，因此创建 `idp-xyz` 后转移仓库。旧 URL 已验证自动重定向到新地址。
-- 远端 `HEAD` 与 `refs/heads/main` 当时均指向 `27543027c997a9eb77246c1ef62c85f3f22acc1e`；该观测值可变，不是 `B-06` 基线或发布授权。
-- 迁移后 Actions workflow、Ruleset、Environment 和 tag 的 API 结果均为空，默认分支设置页明确显示尚未配置保护规则，证明发布部署尚未开始。
+- 完整源码推送后，远端 `HEAD` 与 `refs/heads/main` 均指向 `6da1e17e74eeecc9ec120d646642f2f303f4ccbd`；该观测值可变，不是 `B-06` 基线或发布授权。
+- 迁移后 Actions workflow、Ruleset、Environment 和 tag 的 API 结果均为空。私有化后的 Ruleset 页面继续确认当前没有 Ruleset，并明确提示免费 Organization 的私有仓库规则不会执行，必须升级 GitHub Team；账单资料和付款尚未完成，因此默认分支保护和发布控制面仍未部署。
 
 ## 剩余外部绑定
 

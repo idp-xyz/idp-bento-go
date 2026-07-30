@@ -11,8 +11,8 @@
 - 已实现并测试 `domain`、`repository`、`application`、`eventing` 和 `testkit` 稳定核心。
 - 已实现 `postgres`、`postgres/outbox`、`postgres/inbox`、不可变迁移、只读 `CheckSchema`、PostgreSQL 编译夹具和真实端口集成测试。
 - 已建立八个公共包的无本机绝对路径 `.apidiff` 快照、两个编译夹具，以及 132-case 的 Envelope v1 行为清单。
-- 仓库内 `I-04` 矩阵已在 PostgreSQL 16.12 上通过；`B-05` 已确认使用 GitHub Actions，但真实 workflow、App、WORM 存储和受保护 CI 证据仍未绑定。
-- 当前状态是“`v0.1` 本地实现基线完成”，不是稳定版本发布完成；Git 仓库与 `go.idp.xyz` vanity 解析合同已确认，但解析基础设施部署、维护者身份、RC 和 TMS/Parcel 同一候选合同尚未完成。
+- 仓库内 `I-04` 矩阵已在 PostgreSQL 16.12 上通过；2026-07-30 又使用一次性 PostgreSQL 16.9 容器通过 `candidatecheck -initial-v0-1` 的全部 18 个门禁。`B-05` 已确认使用 GitHub Actions，但真实 workflow、App、WORM 存储和受保护 CI 证据仍未绑定。
+- 私有远端仓库已经接收完整源码，`main` 当前指向 `6da1e17e74eeecc9ec120d646642f2f303f4ccbd`；免费 Organization 不执行私有仓库 Ruleset，Team 升级、受保护默认分支、解析基础设施、维护者身份、RC 和 TMS/Parcel 同一候选合同尚未完成，因此当前仍不是稳定版本发布完成。
 
 ## 已确认基线
 
