@@ -1,0 +1,49 @@
+name: Framework CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: framework-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  candidatecheck:
+    name: Candidate gates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      GOTOOLCHAIN: local
+      IDP_BENTO_POSTGRES_DSN: postgres://idp_bento_ci:idp_bento_ci@127.0.0.1:5432/idp_bento_ci?sslmode=disable
+    services:
+      postgres:
+        image: postgres:16.12-alpine@sha256:97ff59a4e30e08d1c11bdcd9455e7832368c0572b576c9092cde2df4ae5552a3
+        env:
+          POSTGRES_USER: idp_bento_ci
+          POSTGRES_PASSWORD: idp_bento_ci
+          POSTGRES_DB: idp_bento_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U idp_bento_ci -d idp_bento_ci"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version: 1.26.5
+          cache: true
+
+      - name: Run candidate gates
+        run: go run ./internal/cmd/candidatecheck -initial-v0-1
