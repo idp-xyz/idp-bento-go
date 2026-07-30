@@ -1,0 +1,8 @@
+{
+  "format_version": 1,
+  "current_spec_version": "1.0",
+  "version_manifest": "envelope-v1.json",
+  "version_manifest_sha256": "0d833aabef6e644208801f1a13164bcd0eb66db4c0c3b514e3ffabcde3f4ee91",
+  "valid_envelope_valid": true,
+  "payload_independent": true
+}

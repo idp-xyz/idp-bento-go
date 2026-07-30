@@ -1,0 +1,1641 @@
+{
+  "format_version": 2,
+  "spec_version": "1.0",
+  "constants": {
+    "FailureClaimLimitExceeded": "outbox.claim_limit_exceeded",
+    "FailureEnvelopeInvalidOnPublish": "envelope.invalid_on_publish",
+    "JSONContentType": "application/json",
+    "MaxCausationIDLength": 128,
+    "MaxCorrelationIDLength": 128,
+    "MaxEventIDLength": 128,
+    "MaxEventTypeLength": 255,
+    "MaxFailureCodeLength": 128,
+    "MaxInboxConsumerLength": 255,
+    "MaxOutboxClaimLimit": 1000,
+    "MaxPartitionKeyLength": 512,
+    "MaxPayloadBytes": 1048576,
+    "MaxScopeLength": 255,
+    "MaxSourceLength": 255,
+    "MaxSubjectLength": 512,
+    "MaxTraceParentLength": 512,
+    "MaxTraceStateLength": 512,
+    "SpecVersionV1": "1.0"
+  },
+  "wire_fields": [
+    {
+      "name": "specversion",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    },
+    {
+      "name": "id",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    },
+    {
+      "name": "source",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    },
+    {
+      "name": "type",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    },
+    {
+      "name": "version",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    },
+    {
+      "name": "scope",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    },
+    {
+      "name": "subject",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    },
+    {
+      "name": "partition_key",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    },
+    {
+      "name": "occurred_at",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    },
+    {
+      "name": "recorded_at",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    },
+    {
+      "name": "correlation_id",
+      "required": false,
+      "nullable": true,
+      "omit_when_empty": true
+    },
+    {
+      "name": "causation_id",
+      "required": false,
+      "nullable": true,
+      "omit_when_empty": true
+    },
+    {
+      "name": "traceparent",
+      "required": false,
+      "nullable": true,
+      "omit_when_empty": true
+    },
+    {
+      "name": "tracestate",
+      "required": false,
+      "nullable": true,
+      "omit_when_empty": true
+    },
+    {
+      "name": "content_type",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    },
+    {
+      "name": "payload",
+      "required": true,
+      "nullable": false,
+      "omit_when_empty": false
+    }
+  ],
+  "cases": [
+    {
+      "id": "all_optional_fields",
+      "input": "All optional propagation fields are present",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "correlation_id": "correlation-0001",
+        "causation_id": "causation-0001",
+        "traceparent": "not-semantic-w3c-but-structurally-valid",
+        "tracestate": "vendor=value",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "array_payload",
+      "input": "Payload is a JSON array",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "causation_id_ascii_exact_byte_limit",
+      "input": "causation_id: ASCII value is exactly 128 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "causation_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "causation_id_ascii_over_byte_limit",
+      "input": "causation_id: ASCII value is 129 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "causation_id_control_character",
+      "input": "causation_id: value contains a control character",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "causation_id_invalid_utf8",
+      "input": "causation_id: value contains invalid UTF-8",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "causation_id_multibyte_exact_byte_limit",
+      "input": "causation_id: multibyte value is exactly 128 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "causation_id": "界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界aa",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "causation_id_multibyte_over_byte_limit",
+      "input": "causation_id: multibyte value is 129 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "causation_id_whitespace",
+      "input": "causation_id: value becomes empty after trimming",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "content_type_control_character",
+      "input": "ContentType contains a control character",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "content_type_invalid_utf8",
+      "input": "ContentType contains invalid UTF-8",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "correlation_id_ascii_exact_byte_limit",
+      "input": "correlation_id: ASCII value is exactly 128 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "correlation_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "correlation_id_ascii_over_byte_limit",
+      "input": "correlation_id: ASCII value is 129 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "correlation_id_control_character",
+      "input": "correlation_id: value contains a control character",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "correlation_id_invalid_utf8",
+      "input": "correlation_id: value contains invalid UTF-8",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "correlation_id_multibyte_exact_byte_limit",
+      "input": "correlation_id: multibyte value is exactly 128 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "correlation_id": "界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界aa",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "correlation_id_multibyte_over_byte_limit",
+      "input": "correlation_id: multibyte value is 129 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "correlation_id_whitespace",
+      "input": "correlation_id: value becomes empty after trimming",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "empty_content_type",
+      "input": "ContentType is empty",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "empty_object_payload",
+      "input": "Payload is an empty JSON object",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {}
+      }
+    },
+    {
+      "id": "empty_payload",
+      "input": "Payload is nil",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "empty_spec_version",
+      "input": "SpecVersion is empty",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": true
+    },
+    {
+      "id": "id_ascii_exact_byte_limit",
+      "input": "id: ASCII value is exactly 128 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "id_ascii_over_byte_limit",
+      "input": "id: ASCII value is 129 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "id_control_character",
+      "input": "id: value contains a control character",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "id_empty",
+      "input": "id: value is empty",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "id_invalid_utf8",
+      "input": "id: value contains invalid UTF-8",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "id_multibyte_exact_byte_limit",
+      "input": "id: multibyte value is exactly 128 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界aa",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "id_multibyte_over_byte_limit",
+      "input": "id: multibyte value is 129 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "id_whitespace",
+      "input": "id: value becomes empty after trimming",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "invalid_json_payload",
+      "input": "Payload is malformed JSON",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "max_version",
+      "input": "Version is max uint32",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 4294967295,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "null_payload",
+      "input": "Payload is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "partition_key_ascii_exact_byte_limit",
+      "input": "partition_key: ASCII value is exactly 512 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "partition_key_ascii_over_byte_limit",
+      "input": "partition_key: ASCII value is 513 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "partition_key_control_character",
+      "input": "partition_key: value contains a control character",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "partition_key_empty",
+      "input": "partition_key: value is empty",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "partition_key_invalid_utf8",
+      "input": "partition_key: value contains invalid UTF-8",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "partition_key_multibyte_exact_byte_limit",
+      "input": "partition_key: multibyte value is exactly 512 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界aa",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "partition_key_multibyte_over_byte_limit",
+      "input": "partition_key: multibyte value is 513 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "partition_key_whitespace",
+      "input": "partition_key: value becomes empty after trimming",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "payload_exact_byte_limit",
+      "input": "Payload is exactly MaxPayloadBytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire_bytes": 1048891,
+      "wire_sha256": "sha256:302fe34f8e1acc4aac43a109a288769c23e153118f8cd61e89410d9669c2238c"
+    },
+    {
+      "id": "payload_over_byte_limit",
+      "input": "Payload is MaxPayloadBytes plus one byte",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "scalar_payload",
+      "input": "Payload is a JSON number",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "scope_ascii_exact_byte_limit",
+      "input": "scope: ASCII value is exactly 255 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "scope_ascii_over_byte_limit",
+      "input": "scope: ASCII value is 256 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "scope_control_character",
+      "input": "scope: value contains a control character",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "scope_empty",
+      "input": "scope: value is empty",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "scope_invalid_utf8",
+      "input": "scope: value contains invalid UTF-8",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "scope_multibyte_exact_byte_limit",
+      "input": "scope: multibyte value is exactly 255 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "scope_multibyte_over_byte_limit",
+      "input": "scope: multibyte value is 256 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "scope_whitespace",
+      "input": "scope: value becomes empty after trimming",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "source_ascii_exact_byte_limit",
+      "input": "source: ASCII value is exactly 255 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "source_ascii_over_byte_limit",
+      "input": "source: ASCII value is 256 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "source_control_character",
+      "input": "source: value contains a control character",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "source_empty",
+      "input": "source: value is empty",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "source_invalid_utf8",
+      "input": "source: value contains invalid UTF-8",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "source_multibyte_exact_byte_limit",
+      "input": "source: multibyte value is exactly 255 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "source_multibyte_over_byte_limit",
+      "input": "source: multibyte value is 256 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "source_whitespace",
+      "input": "source: value becomes empty after trimming",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "subject_ascii_exact_byte_limit",
+      "input": "subject: ASCII value is exactly 512 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "subject_ascii_over_byte_limit",
+      "input": "subject: ASCII value is 513 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "subject_control_character",
+      "input": "subject: value contains a control character",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "subject_empty",
+      "input": "subject: value is empty",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "subject_invalid_utf8",
+      "input": "subject: value contains invalid UTF-8",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "subject_multibyte_exact_byte_limit",
+      "input": "subject: multibyte value is exactly 512 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界aa",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "subject_multibyte_over_byte_limit",
+      "input": "subject: multibyte value is 513 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "subject_whitespace",
+      "input": "subject: value becomes empty after trimming",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "traceparent_ascii_exact_byte_limit",
+      "input": "traceparent: ASCII value is exactly 512 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "traceparent": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "traceparent_ascii_over_byte_limit",
+      "input": "traceparent: ASCII value is 513 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "traceparent_control_character",
+      "input": "traceparent: value contains a control character",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "traceparent_invalid_utf8",
+      "input": "traceparent: value contains invalid UTF-8",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "traceparent_multibyte_exact_byte_limit",
+      "input": "traceparent: multibyte value is exactly 512 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "traceparent": "界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界aa",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "traceparent_multibyte_over_byte_limit",
+      "input": "traceparent: multibyte value is 513 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "traceparent_semantics_not_enforced",
+      "input": "TraceParent is structurally valid but not parsed as W3C Trace Context",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "traceparent": "not-a-w3c-traceparent",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "traceparent_whitespace",
+      "input": "traceparent: value becomes empty after trimming",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "tracestate_ascii_exact_byte_limit",
+      "input": "tracestate: ASCII value is exactly 512 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "tracestate": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "tracestate_ascii_over_byte_limit",
+      "input": "tracestate: ASCII value is 513 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "tracestate_control_character",
+      "input": "tracestate: value contains a control character",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "tracestate_invalid_utf8",
+      "input": "tracestate: value contains invalid UTF-8",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "tracestate_multibyte_exact_byte_limit",
+      "input": "tracestate: multibyte value is exactly 512 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "tracestate": "界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界aa",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "tracestate_multibyte_over_byte_limit",
+      "input": "tracestate: multibyte value is 513 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "tracestate_whitespace",
+      "input": "tracestate: value becomes empty after trimming",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "type_ascii_exact_byte_limit",
+      "input": "type: ASCII value is exactly 255 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "type_ascii_over_byte_limit",
+      "input": "type: ASCII value is 256 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "type_control_character",
+      "input": "type: value contains a control character",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "type_empty",
+      "input": "type: value is empty",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "type_invalid_utf8",
+      "input": "type: value contains invalid UTF-8",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "type_multibyte_exact_byte_limit",
+      "input": "type: multibyte value is exactly 255 bytes",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界界",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "type_multibyte_over_byte_limit",
+      "input": "type: multibyte value is 256 bytes",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "type_whitespace",
+      "input": "type: value becomes empty after trimming",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unknown_spec_version",
+      "input": "SpecVersion is unsupported",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": true
+    },
+    {
+      "id": "unmarshal_malformed_json",
+      "input": "input is malformed JSON",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_missing_causation_id",
+      "input": "causation_id is omitted",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "correlation_id": "correlation-0001",
+        "traceparent": "not-a-w3c-traceparent",
+        "tracestate": "vendor=value",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "unmarshal_missing_content_type",
+      "input": "content_type is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_missing_correlation_id",
+      "input": "correlation_id is omitted",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "causation_id": "causation-0001",
+        "traceparent": "not-a-w3c-traceparent",
+        "tracestate": "vendor=value",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "unmarshal_missing_id",
+      "input": "id is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_missing_occurred_at",
+      "input": "occurred_at is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_missing_partition_key",
+      "input": "partition_key is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_missing_payload",
+      "input": "payload is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_missing_recorded_at",
+      "input": "recorded_at is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_missing_scope",
+      "input": "scope is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_missing_source",
+      "input": "source is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_missing_specversion",
+      "input": "specversion is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": true
+    },
+    {
+      "id": "unmarshal_missing_subject",
+      "input": "subject is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_missing_traceparent",
+      "input": "traceparent is omitted",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "correlation_id": "correlation-0001",
+        "causation_id": "causation-0001",
+        "tracestate": "vendor=value",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "unmarshal_missing_tracestate",
+      "input": "tracestate is omitted",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "correlation_id": "correlation-0001",
+        "causation_id": "causation-0001",
+        "traceparent": "not-a-w3c-traceparent",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "unmarshal_missing_type",
+      "input": "type is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_missing_version",
+      "input": "version is omitted",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_null_causation_id",
+      "input": "causation_id is JSON null",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "correlation_id": "correlation-0001",
+        "traceparent": "not-a-w3c-traceparent",
+        "tracestate": "vendor=value",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "unmarshal_null_content_type",
+      "input": "content_type is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_null_correlation_id",
+      "input": "correlation_id is JSON null",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "causation_id": "causation-0001",
+        "traceparent": "not-a-w3c-traceparent",
+        "tracestate": "vendor=value",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "unmarshal_null_id",
+      "input": "id is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_null_occurred_at",
+      "input": "occurred_at is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_null_partition_key",
+      "input": "partition_key is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_null_payload",
+      "input": "payload is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_null_recorded_at",
+      "input": "recorded_at is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_null_scope",
+      "input": "scope is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_null_source",
+      "input": "source is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_null_specversion",
+      "input": "specversion is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": true
+    },
+    {
+      "id": "unmarshal_null_subject",
+      "input": "subject is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_null_traceparent",
+      "input": "traceparent is JSON null",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "correlation_id": "correlation-0001",
+        "causation_id": "causation-0001",
+        "tracestate": "vendor=value",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "unmarshal_null_tracestate",
+      "input": "tracestate is JSON null",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "correlation_id": "correlation-0001",
+        "causation_id": "causation-0001",
+        "traceparent": "not-a-w3c-traceparent",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "unmarshal_null_type",
+      "input": "type is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_null_version",
+      "input": "version is JSON null",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "unmarshal_unknown_field",
+      "input": "an unknown future field is present",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "correlation_id": "correlation-0001",
+        "causation_id": "causation-0001",
+        "traceparent": "not-a-w3c-traceparent",
+        "tracestate": "vendor=value",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "unmarshal_unknown_spec_version",
+      "input": "specversion is unsupported",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": true
+    },
+    {
+      "id": "valid",
+      "input": "testkit.ValidEnvelope()",
+      "valid": true,
+      "is_invalid_envelope": false,
+      "is_unsupported_spec_version": false,
+      "wire": {
+        "specversion": "1.0",
+        "id": "event-0001",
+        "source": "testkit",
+        "type": "test.fact.occurred",
+        "version": 1,
+        "scope": "test-scope",
+        "subject": "test-subject",
+        "partition_key": "test-scope/test-subject",
+        "occurred_at": "2026-01-02T03:04:05Z",
+        "recorded_at": "2026-01-02T03:04:05.000000001Z",
+        "content_type": "application/json",
+        "payload": {
+          "value": "test"
+        }
+      }
+    },
+    {
+      "id": "wrong_content_type",
+      "input": "ContentType is not JSONContentType",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "zero_occurred_at",
+      "input": "OccurredAt is zero",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "zero_recorded_at",
+      "input": "RecordedAt is zero",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    },
+    {
+      "id": "zero_version",
+      "input": "Version is zero",
+      "valid": false,
+      "is_invalid_envelope": true,
+      "is_unsupported_spec_version": false
+    }
+  ],
+  "properties": {
+    "clone_payload_independent": true,
+    "optional_fields_omitted": true,
+    "payload_is_embedded_json": true,
+    "round_trip_preserves_value": true,
+    "times_are_utc_rfc3339nano": true,
+    "unknown_fields_accepted": true
+  }
+}

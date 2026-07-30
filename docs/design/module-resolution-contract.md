@@ -1,0 +1,93 @@
+# `go.idp.xyz` module 解析合同
+
+状态：设计已确认；基础设施部署未验证
+
+日期：2026-07-30
+
+## 主题与范围
+
+本文确认 `go.idp.xyz/idp-bento-go` 在 `v0.1` 的跨仓解析方式，并固定首次 RC 前必须通过的基础设施验收。本文不创建 DNS、TLS 证书、GitHub 凭据、CI 工作流、tag 或发布候选，也不改变正式 module path。
+
+## 已确认决定
+
+| 项目 | 结论 |
+| --- | --- |
+| 正式 module path | `go.idp.xyz/idp-bento-go` |
+| Git 仓库 | `https://github.com/idp-xyz/idp-bento-go` |
+| `v0.1` 解析方式 | `go.idp.xyz` 通过 HTTPS vanity metadata 直接指向 GitHub Git 仓库 |
+| 私有 GOPROXY | `v0.1` 不引入；未来如需集中缓存、审计或离线可用性，可在不改变 module path 的前提下另行绑定 |
+| 元数据可见性 | `go-import` 元数据可以公开，只暴露 module prefix、VCS 类型和已确认的仓库地址；源码访问继续由 GitHub 仓库权限控制 |
+| 消费者边界 | TMS、Parcel 只通过正式 module path 和不可变 SemVer 获取框架，不复制源码、不使用浮动分支或生产 `replace` |
+
+该选择不新增 ADR。ADR-0008 已经固定“模块身份与 Git transport 解耦”；vanity metadata 是该决定下可替换的发布基础设施实现，不满足难以逆转条件。
+
+## HTTP 合同
+
+解析服务必须通过有效的公开 HTTPS 证书响应：
+
+- `GET https://go.idp.xyz/idp-bento-go?go-get=1`
+- `GET https://go.idp.xyz/idp-bento-go/<任意包子路径>?go-get=1`
+
+两类请求都必须返回 `200`，并在 HTML `<head>` 中包含且只包含一个适用于该 module prefix 的 `go-import` 元数据：
+
+```html
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="go-import" content="go.idp.xyz/idp-bento-go git https://github.com/idp-xyz/idp-bento-go.git">
+</head>
+<body></body>
+</html>
+```
+
+- prefix 必须精确为 `go.idp.xyz/idp-bento-go`，不得使用 GitHub 路径作为 module identity。
+- VCS 必须为 `git`，仓库根必须精确指向 `https://github.com/idp-xyz/idp-bento-go.git`。
+- 带 `go-get=1` 的请求不得在返回元数据前重定向到 GitHub、登录页或通用站点首页。
+- 不带 `go-get=1` 的浏览器请求可以重定向到 GitHub 仓库，但不能影响 Go 命令的解析响应。
+- 不配置 `GOINSECURE`，不允许无效证书、明文 HTTP 或跳过 TLS 校验。
+
+## 私有仓库认证边界
+
+如果 GitHub 仓库需要认证，vanity 页面仍不承载 Git 凭据。CI 在 Git 访问层使用 `B-05` 后续绑定的短期最小权限凭据，并遵守：
+
+- `GOPRIVATE=go.idp.xyz`，避免把私有 module 路径、版本和校验查询发送到公共 GOPROXY 或公共 checksum database。
+- 隔离验收作业显式使用 `GOPROXY=direct` 和 `GONOSUMDB=go.idp.xyz`；消费者普通构建可保留组织级 GOPROXY，同时让 `GOPRIVATE` 对本 module 走直连。
+- `GIT_TERMINAL_PROMPT=0`，缺少凭据时立即失败，不能等待交互输入。
+- 凭据不得写入 clone URL、`go.env`、仓库文件、构建参数、日志、module cache 制品或最终镜像层。
+- 不使用带明文 token 的全局 Git `insteadOf` 配置；凭据载体、轮换、撤销和审计由 `B-05` 绑定。
+
+仓库公开或私有的实际策略由 GitHub 仓库设置决定；本文不根据 URL 推断可见性，也不把“私有化交付”等同于“公开源码仓库”。
+
+## 首次 RC 验收
+
+`B-01B` 只有在以下证据全部存在后才能从“配置已确认、部署未验证”改为 `BOUND`：
+
+1. DNS 将 `go.idp.xyz` 解析到公司控制的服务，TLS 证书有效且自动续期责任明确。
+2. module 根路径和至少一个真实公共包子路径的 `?go-get=1` 响应满足上述精确元数据合同。
+3. 在空 `GOMODCACHE`、空 `GOCACHE`、无本地 `replace`、`GOPROXY=direct` 和禁止交互提示的环境中，消费者身份能够下载真实不可变 `v0.1.0-rc.N`。
+4. `go mod download -json go.idp.xyz/idp-bento-go@v0.1.0-rc.N` 返回精确 Path、Version、module checksum 和预期 Git origin；tag 必须来自绑定仓库且不得重写。
+5. TMS、Parcel 的最小合同作业分别从正式 module path 编译，不从本地目录、GitHub module path 或源码副本取代候选。
+6. 受保护 CI 保存解析响应摘要、DNS/TLS 检查、候选版本、完整框架提交、module checksum、Git origin 和作业时间；不得保存访问凭据或源码制品。
+
+验收命令中的 RC 版本和凭据只能使用真实外部值。当前没有不可变 RC，因此本文不提供伪造的成功输出。
+
+## 失败关闭规则
+
+- DNS、TLS、元数据、Git 认证或 tag 任一失败：阻断 RC，不允许临时改用 GitHub import path。
+- 元数据指向非预期仓库或返回多个冲突 prefix：视为供应链风险，阻断所有候选获取并回滚解析部署。
+- Git tag 被移动、删除或相同版本产生不同 checksum：阻断稳定发布并按发布安全事件处理。
+- vanity 服务不可用：冷缓存构建和新候选获取失败；已有缓存不能作为发布门禁通过证据。
+- GitHub 组织或仓库迁移：先更新 vanity 目标并完成空缓存验收，module path 保持不变。
+- 未来引入私有 GOPROXY：必须证明候选版本、checksum、不可变性和凭据边界不弱于本合同，且不能改变消费者 import path。
+
+## 所有权
+
+- 框架维护组拥有 module prefix、预期 Git 仓库、不可变 tag 和本验收合同。
+- 公司域名/平台维护方拥有 DNS、TLS、vanity 响应部署、可用性和变更保护。
+- `B-05` 的 CI/安全维护方拥有 GitHub 读取身份、短期凭据和审计证据。
+- TMS、Parcel 只拥有各自消费凭据和合同作业，不拥有 vanity 路由或框架 tag。
+
+## 当前状态
+
+解析方式、精确元数据和验收标准已经确认。2026-07-30 创建公司 Organization `idp-xyz` 并将仓库迁移到 `https://github.com/idp-xyz/idp-bento-go`；repository ID 保持 `1315735832`，owner ID 变为 `311024230`，旧 URL 自动重定向。远端仍无 tag；同日 DNS 查询对 `go.idp.xyz` 返回 `NXDOMAIN`，因此 TLS、线上元数据和空缓存真实 RC 下载均无法执行。`B-01B` 继续阻断跨仓候选与发布，且不得把当前可移动的 `main` 提交当作候选基线。

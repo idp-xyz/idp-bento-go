@@ -1,0 +1,37 @@
+{
+  "format_version": 1,
+  "packages": [
+    {
+      "path": "domain",
+      "stability": "STABLE-CORE"
+    },
+    {
+      "path": "repository",
+      "stability": "STABLE-CORE"
+    },
+    {
+      "path": "eventing",
+      "stability": "STABLE-CORE"
+    },
+    {
+      "path": "application",
+      "stability": "STABLE-CORE"
+    },
+    {
+      "path": "testkit",
+      "stability": "STABLE-CORE"
+    },
+    {
+      "path": "postgres",
+      "stability": "EXPERIMENTAL"
+    },
+    {
+      "path": "postgres/outbox",
+      "stability": "EXPERIMENTAL"
+    },
+    {
+      "path": "postgres/inbox",
+      "stability": "EXPERIMENTAL"
+    }
+  ]
+}
