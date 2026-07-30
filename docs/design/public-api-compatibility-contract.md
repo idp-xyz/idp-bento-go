@@ -154,7 +154,8 @@ internal/
 
 - `packages.json` 使用 UTF-8、LF、稳定字段顺序，记录格式版本、相对包路径和稳定性，不记录本机绝对路径、生成时间或 CI run ID。
 - `snapshots/*.apidiff` 是 apidiff 可直接读取的二进制 export data，不是文本。它们由 `internal/cmd/apisnapshot` 使用空 `token.FileSet` 生成，禁止手工编辑。
-- 官方 `go tool apidiff -w` 会把 checkout 与 Go toolchain 的绝对源码路径写入逐包 export data，即使设置 `GOFLAGS=-trimpath` 也不会消除；因此不得用它直接更新提交基线。固定版本的官方 apidiff 仍负责读取基线并执行类型语义比较。
+- snapshot 生成和 apidiff 当前包加载统一使用规范目标 `GOOS=linux`、`GOARCH=amd64`、`CGO_ENABLED=0`，不得继承开发机平台；否则引用 `testing` 等带平台构建约束的导出数据会让 Windows 与 Linux 对同一源码产生不同基线。
+- 官方 `go tool apidiff -w` 会把 checkout 与 Go toolchain 的绝对源码路径写入逐包 export data，即使设置 `GOFLAGS=-trimpath` 也不会消除；因此不得用它直接更新提交基线。`internal/cmd/apicheck` 使用固定版本的官方 `apidiff` 库读取基线并执行类型语义比较，工具进程本身继续使用宿主平台。
 - `compat/compile/core` 使用每个稳定核心符号并验证关键接口赋值；`compat/compile/postgres` 只做构造与类型级编译，不连接数据库。
 - `internal/cmd/compatmanifest` 运行公开 API 的确定性 case matrix，输出规范 JSON；生成器和结果都进入评审。
 - `internal/cmd/compatcheck` 只读比较独立的不可变旧 `api/` 基线与候选制品，不提供 `-update`，并拒绝旧基线与候选指向同一目录。

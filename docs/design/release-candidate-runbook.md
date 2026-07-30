@@ -48,7 +48,7 @@ go run ./internal/cmd/candidatecheck -baseline D:\artifacts\idp-bento-go\<前序
 4. 使用 `apisnapshot -require-all` 检查八个公共包 snapshot。
 5. 检查 `envelope-v1.json` 与 `envelope-current.json` 行为清单。
 6. 执行生产依赖图门禁。
-7. 使用锁定的官方 apidiff 逐一比较八个 snapshot 与当前包；任何输出都作为公共变化失败。
+7. 使用 `go run ./internal/cmd/apicheck` 逐一比较八个 snapshot 与当前包；命令通过固定版本的官方 `apidiff` 库执行比较，只对当前包加载固定规范目标 `linux/amd64`、`CGO_ENABLED=0`，任何输出都作为公共变化失败，宿主平台不得改变基线。
 8. 非初始候选使用 `compatcheck` 比较独立旧基线与当前候选。
 9. 执行 `go vet ./...`。
 10. 执行 `go test -count=1 ./...`，禁用测试缓存；DSN 前置检查保证 PostgreSQL 矩阵不能因环境缺失而跳过。

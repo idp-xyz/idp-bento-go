@@ -16,6 +16,7 @@ import (
 
 	"golang.org/x/exp/apidiff"
 	"golang.org/x/tools/go/gcexportdata"
+	"golang.org/x/tools/go/packages"
 )
 
 // Change is one compatibility finding between an immutable baseline and a candidate.
@@ -88,6 +89,61 @@ func compareTypePackages(relativePath string, oldPackage, newPackage *types.Pack
 		}
 	}
 	return changes
+}
+
+// LoadCanonicalPackage loads one package for the platform used by committed API snapshots.
+func LoadCanonicalPackage(importPath string) (*types.Package, error) {
+	config := &packages.Config{
+		Mode: packages.LoadTypes | packages.NeedName | packages.NeedTypes | packages.NeedImports | packages.NeedDeps,
+		Env:  canonicalBuildEnvironment(os.Environ()),
+	}
+	loaded, err := packages.Load(config, importPath)
+	if err != nil {
+		return nil, fmt.Errorf("load package %q: %w", importPath, err)
+	}
+	if len(loaded) != 1 {
+		return nil, fmt.Errorf("load package %q: got %d packages", importPath, len(loaded))
+	}
+	if len(loaded[0].Errors) > 0 {
+		messages := make([]string, 0, len(loaded[0].Errors))
+		for _, packageError := range loaded[0].Errors {
+			messages = append(messages, packageError.Error())
+		}
+		return nil, fmt.Errorf("load package %q: %s", importPath, strings.Join(messages, "; "))
+	}
+	return loaded[0].Types, nil
+}
+
+// CompareSnapshotToPackage compares committed export data with current source under the canonical target.
+func CompareSnapshotToPackage(snapshotPath, importPath string) (apidiff.Report, error) {
+	baseline, err := readSnapshot(snapshotPath)
+	if err != nil {
+		return apidiff.Report{}, fmt.Errorf("read snapshot: %w", err)
+	}
+	candidate, err := LoadCanonicalPackage(importPath)
+	if err != nil {
+		return apidiff.Report{}, err
+	}
+	return apidiff.Changes(baseline, candidate), nil
+}
+
+func canonicalBuildEnvironment(base []string) []string {
+	overrides := []string{"GOOS=linux", "GOARCH=amd64", "CGO_ENABLED=0"}
+	overridden := make(map[string]bool, len(overrides))
+	for _, entry := range overrides {
+		key, _, _ := strings.Cut(entry, "=")
+		overridden[strings.ToUpper(key)] = true
+	}
+
+	merged := make([]string, 0, len(base)+len(overrides))
+	for _, entry := range base {
+		key, _, ok := strings.Cut(entry, "=")
+		if ok && overridden[strings.ToUpper(key)] {
+			continue
+		}
+		merged = append(merged, entry)
+	}
+	return append(merged, overrides...)
 }
 
 func exportedGenericConstraints(pkg *types.Package) map[string]string {

@@ -144,6 +144,12 @@ func assertAPIDiffSteps(t *testing.T, steps []commandSpec, want int) {
 			if !step.RejectOutput {
 				t.Fatalf("API diff step %q does not reject output", step.Label)
 			}
+			packagePath := strings.TrimPrefix(step.Label, "compare API ")
+			filename := strings.ReplaceAll(packagePath, "/", "-") + ".apidiff"
+			wantArgs := []string{"run", "./internal/cmd/apicheck", "-snapshot", filepath.Join(repositoryRoot(t), "api", "snapshots", filename), "-package", modulePath + "/" + packagePath, "-label", packagePath}
+			if step.Name != "go" || strings.Join(step.Args, "\x00") != strings.Join(wantArgs, "\x00") {
+				t.Fatalf("API diff step %q = %s %q, want go %q", step.Label, step.Name, step.Args, wantArgs)
+			}
 		}
 	}
 	if count != want {

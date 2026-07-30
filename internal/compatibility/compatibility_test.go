@@ -83,6 +83,39 @@ func TestCurrentAPISnapshotsCompareCleanly(t *testing.T) {
 	}
 }
 
+func TestCanonicalBuildEnvironment(t *testing.T) {
+	t.Parallel()
+	got := canonicalBuildEnvironment([]string{
+		"PATH=fixture",
+		"GOOS=windows",
+		"goarch=386",
+		"CGO_ENABLED=1",
+	})
+	want := []string{
+		"PATH=fixture",
+		"GOOS=linux",
+		"GOARCH=amd64",
+		"CGO_ENABLED=0",
+	}
+	if strings.Join(got, "\x00") != strings.Join(want, "\x00") {
+		t.Fatalf("environment = %q, want %q", got, want)
+	}
+}
+
+func TestCurrentSnapshotMatchesCanonicalPackage(t *testing.T) {
+	repository := repositoryRoot(t)
+	report, err := CompareSnapshotToPackage(
+		filepath.Join(repository, "api", "snapshots", "domain.apidiff"),
+		"go.idp.xyz/idp-bento-go/domain",
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(report.Changes) != 0 {
+		t.Fatalf("canonical package differs from snapshot: %s", report.String())
+	}
+}
+
 func TestCandidateSnapshotUpdateCannotRewriteImmutableAPIBaseline(t *testing.T) {
 	t.Parallel()
 	baselineDir := filepath.Join(t.TempDir(), "baseline")

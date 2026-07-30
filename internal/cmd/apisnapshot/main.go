@@ -15,8 +15,8 @@ import (
 	"sort"
 	"strings"
 
+	"go.idp.xyz/idp-bento-go/internal/compatibility"
 	"golang.org/x/tools/go/gcexportdata"
-	"golang.org/x/tools/go/packages"
 )
 
 const modulePath = "go.idp.xyz/idp-bento-go"
@@ -173,21 +173,14 @@ func packageDirectoryExists(path string) (bool, error) {
 
 func loadAndEncode(path string) ([]byte, error) {
 	importPath := modulePath + "/" + path
-	cfg := &packages.Config{Mode: packages.LoadTypes | packages.NeedName | packages.NeedTypes | packages.NeedImports | packages.NeedDeps}
-	loaded, err := packages.Load(cfg, importPath)
+	loaded, err := compatibility.LoadCanonicalPackage(importPath)
 	if err != nil {
-		return nil, fmt.Errorf("load package %q: %w", path, err)
-	}
-	if len(loaded) != 1 {
-		return nil, fmt.Errorf("load package %q: got %d packages", path, len(loaded))
-	}
-	if len(loaded[0].Errors) > 0 {
-		return nil, fmt.Errorf("load package %q: %s", path, packageErrors(loaded[0].Errors))
+		return nil, err
 	}
 
 	var output bytes.Buffer
-	fmt.Fprintln(&output, loaded[0].PkgPath)
-	if err := writeExportData(&output, loaded[0].Types); err != nil {
+	fmt.Fprintln(&output, loaded.Path())
+	if err := writeExportData(&output, loaded); err != nil {
 		return nil, fmt.Errorf("encode package %q: %w", path, err)
 	}
 	return output.Bytes(), nil
@@ -254,12 +247,4 @@ func staleSnapshots(outputDir string, expected map[string]bool) ([]string, error
 
 func snapshotFilename(path string) string {
 	return strings.ReplaceAll(path, "/", "-") + ".apidiff"
-}
-
-func packageErrors(packageErrors []packages.Error) string {
-	messages := make([]string, 0, len(packageErrors))
-	for _, packageError := range packageErrors {
-		messages = append(messages, packageError.Error())
-	}
-	return strings.Join(messages, "; ")
 }

@@ -160,7 +160,7 @@ func candidateSteps(goFiles, packagePaths []string, baseline, candidateAPI strin
 		steps = append(steps, commandSpec{
 			Label:        "compare API " + packagePath,
 			Name:         "go",
-			Args:         []string{"tool", "apidiff", filepath.Join(candidateAPI, "snapshots", filename), modulePath + "/" + packagePath},
+			Args:         []string{"run", "./internal/cmd/apicheck", "-snapshot", filepath.Join(candidateAPI, "snapshots", filename), "-package", modulePath + "/" + packagePath, "-label", packagePath},
 			RejectOutput: true,
 		})
 	}
