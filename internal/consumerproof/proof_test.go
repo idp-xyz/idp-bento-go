@@ -45,6 +45,9 @@ func TestValidatePairRejectsInvalidEvidence(t *testing.T) {
 		{name: "overlong governance mode", mutate: func(_ *Proof, parcel *Proof, _ *Expectation) {
 			parcel.AcknowledgedGovernanceMode = strings.Repeat("A", 65)
 		}, wantErr: "acknowledged_governance_mode"},
+		{name: "consumers acknowledge different modes", mutate: func(_ *Proof, parcel *Proof, _ *Expectation) {
+			parcel.AcknowledgedGovernanceMode = "DUAL_MAINTAINER"
+		}, wantErr: "both consumers must acknowledge the same mode"},
 	}
 	for _, test := range tests {
 		test := test

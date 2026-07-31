@@ -51,8 +51,9 @@ type Expectation struct {
 	ParcelConsumerCommit string
 }
 
-// GovernanceMode 报告两个消费者一致确认的治理模式。只有 ValidatePair 通过后
-// 该值才有意义，调用方据此与发布证据 manifest 的权威值比对。
+// GovernanceMode 报告两个消费者一致确认的治理模式；两侧不一致时返回空串。
+// ValidatePair 已经拒绝不一致的组合，所以调用方拿到的非空值可直接与发布证据
+// manifest 的权威值比对。
 func GovernanceMode(tms, parcel Proof) string {
 	if tms.AcknowledgedGovernanceMode != parcel.AcknowledgedGovernanceMode {
 		return ""
@@ -93,6 +94,10 @@ func ValidatePair(tms, parcel Proof, expected Expectation) error {
 	}
 	if err := validateProof(parcel, ConsumerParcel, expected.ParcelConsumerCommit, expected); err != nil {
 		return fmt.Errorf("Parcel proof: %w", err)
+	}
+	if tms.AcknowledgedGovernanceMode != parcel.AcknowledgedGovernanceMode {
+		return fmt.Errorf("TMS acknowledged governance mode %q but Parcel acknowledged %q; both consumers must acknowledge the same mode",
+			tms.AcknowledgedGovernanceMode, parcel.AcknowledgedGovernanceMode)
 	}
 	return nil
 }

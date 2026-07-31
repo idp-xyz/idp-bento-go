@@ -25,7 +25,9 @@
 | `contract_suite_version` | 1 至 128 字节、无空白的可打印 ASCII 标识；必须与协调命令期望值完全一致。两个消费者必须报同一个值，不得使用各自的本地套件名，否则 `proofcheck` 对其中一方必然失败。`v0.1` 使用 `r05-v1` |
 | `result` | `proofcheck` 只接受 `PASS`；`FAIL`、未知值、缺失证明和跳过都阻断稳定 tag |
 | `completed_at` | 可由 `time.RFC3339Nano` 解析的完成时间 |
-| `acknowledged_governance_mode` | 消费者确认自己知晓框架当前的治理模式。1 至 64 字节、无空白的可打印 ASCII 大写标识；必须与 manifest `framework.governance_mode` 完全一致。两个消费者必须报同一个值——由消费者自报框架治理模式在语义上是错的，所以这里记的是**确认**而非声明，权威值在 manifest |
+| `acknowledged_governance_mode` | 消费者确认自己知晓框架当前的治理模式。1 至 64 字节、无空白的可打印 ASCII 大写标识。由消费者自报框架治理模式在语义上是错的，所以这里记的是**确认**而非声明，权威值在 manifest `framework.governance_mode` |
+
+治理模式的比对分两层，因为两者能在不同时点执行。`proofcheck` 校验两个消费者报同一个值——这在 RC 阶段就能做，此时 manifest 尚不存在。`evidencecheck` 再校验该共同值等于框架的权威声明。少了第一层，两侧各报一个值会一路通过到证据阶段才被发现。
 
 以下只是格式示例，不是实际候选证明：
 
