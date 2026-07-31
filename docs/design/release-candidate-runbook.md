@@ -83,8 +83,8 @@ go run ./internal/cmd/candidatecheck -baseline D:\artifacts\idp-bento-go\<前序
 | 项目 | 状态 |
 | --- | --- |
 | `v0.1.0-rc.1` tag 与空缓存下载证明 | 已完成，见[module 解析与 vanity 合同](./module-resolution-contract.md) |
-| TMS 消费者合同（`tests/bentocontract`，提交 `f8eb9c3`） | 已通过 TBC-01 至 TBC-05 |
-| Parcel 消费者合同（`tests/bentocontract`，提交 `960a516`） | 已建立并锁定同一 checksum；`PBC-01`、`PBC-05` 通过，`PBC-06`、`PBC-08` 的 PostgreSQL 集成子用例因缺 `IDP_PARCEL_POSTGRES_DSN` 而跳过 |
+| TMS 消费者合同（`tests/bentocontract`） | 提交 `f8eb9c3` 锁定候选并建立 `TBC-01` 至 `TBC-05`，提交 `7661603` 补齐 PostgreSQL 迁移与 `TBC-06` 至 `TBC-08`；八个用例已在 PostgreSQL 16.14 上以 `-count=1` 全部通过 |
+| Parcel 消费者合同（`tests/bentocontract`，提交 `960a516`） | 锁定同一 checksum，`PBC-01`、`PBC-05`、`PBC-06`、`PBC-08` 已在 PostgreSQL 16.14 上以 `-count=1` 全部通过 |
 | 受保护候选 workflow、App、证明存储与 provenance（`B-05`） | 未绑定 |
 | `proofcheck` / `evidencecheck`、WORM Compliance Lock 与 DSSE 回执 | 未执行 |
 | 24 小时冷静期与新 CI run 复验 | 未开始 |

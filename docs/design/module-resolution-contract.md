@@ -93,7 +93,7 @@
 
 一次早期尝试因作业环境设置 `GOSUMDB=off` 而失败：工具链模块 `golang.org/toolchain@v0.0.1-go1.26.5.linux-amd64` 报 `verifying module: checksum database disabled by GOSUMDB=off`。该失败属于验收环境配置错误，不是解析或凭据缺陷，处置方式是改用 `GOPRIVATE` 而非全局关闭校验。
 
-第 5 项两侧合同作业都已建立并在真实 PostgreSQL 16 上完整执行。`idp-tms` 在提交 `f8eb9c3` 锁定该精确候选，`tests/bentocontract` 从正式 module path 编译并比对 checksum，`TBC-01` 至 `TBC-08` 全部通过。`idp-parcel` 在提交 `960a516` 锁定同一候选，`go.sum` 记录的 `h1:` 与 `/go.mod h1:` 与本文表格逐字一致；`PBC-01`、`PBC-05`、`PBC-06`、`PBC-08` 在 PostgreSQL 16.14 上以 `-count=1` 全部通过，其中 `PBC-06` 的 5 个 Outbox 与 5 个 Inbox 子用例、`PBC-08` 的事务边界断言均真实执行而非跳过。
+第 5 项两侧合同作业都已建立并在真实 PostgreSQL 16 上完整执行。`idp-tms` 在提交 `f8eb9c3` 锁定该精确候选并建立 `TBC-01` 至 `TBC-05`，在提交 `7661603` 补齐 PostgreSQL 迁移与集成门禁 `TBC-06` 至 `TBC-08`；`tests/bentocontract` 从正式 module path 编译并比对 checksum，八个用例在 PostgreSQL 16.14 上以 `-count=1` 全部通过。`idp-parcel` 在提交 `960a516` 锁定同一候选，`go.sum` 记录的 `h1:` 与 `/go.mod h1:` 与本文表格逐字一致；`PBC-01`、`PBC-05`、`PBC-06`、`PBC-08` 在 PostgreSQL 16.14 上以 `-count=1` 全部通过，其中 `PBC-06` 的 5 个 Outbox 与 5 个 Inbox 子用例、`PBC-08` 的事务边界断言均真实执行而非跳过。
 
 跳过行为本身受门禁保护：`internal/platform/pgtest` 在 `CI` 已设置而 `IDP_PARCEL_POSTGRES_DSN` 缺失时直接失败，只有本地开发环境才降级为 `t.Skip`。因此受保护 CI 中不存在"集成子用例被跳过但进程报 `PASS`"的路径。
 
