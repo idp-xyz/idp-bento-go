@@ -49,7 +49,7 @@ go run ./internal/cmd/apisnapshot -require-all
 
 本次本地矩阵全部通过，并在执行中发现并修复了 `CheckSchema` trigger catalog 查询使用 PostgreSQL 保留字 `constraint` 作为别名的问题。首版不存在上一迁移版本，升级测试记录为 `not applicable`；下一项迁移必须增加从上一受支持版本升级的用例。
 
-该追记不是受保护 CI 证明。`B-05` 的 GitHub Actions、WORM、OIDC 和 DSSE 配置已经确认，但真实 workflow、身份、S3/KMS 标识和演练尚未绑定，因此 CI run ID、候选 checksum 与 TMS/Parcel 同一候选结果仍不存在，并继续阻断 RC 和稳定发布。
+该追记不是受保护 CI 证明。基础 `Framework CI` 已在 run `30563832922` 通过仓内门禁，但 GitHub Free 下私有仓库 Ruleset 不执行；候选/发布 workflow、身份、S3/KMS 标识和演练尚未绑定，因此该 run 不能提供受保护候选 checksum 或 TMS/Parcel 同一候选结果，并继续阻断 RC 和稳定发布。
 
 ## 为什么拆分设计证据与实现验收
 

@@ -2,13 +2,13 @@
 
 状态：已确认
 
-Audit date: 2026-07-30
+Audit date: 2026-07-31
 
 ## 结论
 
 框架的产品边界、仓库边界、Repository 策略、迁移所有权、消费者合同、治理、版本支持、可观测性以及 `R-01` 至 `R-06` 的公共设计合同已完成。五个稳定核心包、三个实验性 PostgreSQL 包、迁移资产、`testkit` 合同运行器和本地兼容性制品均已实现。
 
-当前仓库已经达到“开发人员无需补充公共架构判断即可使用和继续加固 `v0.1` 本地基线”的标准。PostgreSQL 16.12 仓库内 `I-04` 矩阵已经通过，实际 Git 仓库和 vanity 解析合同已确认；受保护 CI、线上解析部署、候选治理和双消费者证明仍由外部绑定阻断。这些是发布与组织门禁，不是遗留设计歧义。
+当前仓库已经达到“开发人员无需补充公共架构判断即可使用和继续加固 `v0.1` 基线”的标准。PostgreSQL 16.12 仓库矩阵和未受保护的基础 GitHub Actions CI 已经通过，实际 Git 仓库和 vanity 解析合同已确认；受保护 CI、线上解析部署、候选治理和双消费者证明仍由外部绑定阻断。这些是发布与组织门禁，不是遗留设计歧义。
 
 ## 当前实现状态
 
@@ -18,8 +18,8 @@ Audit date: 2026-07-30
 | `testkit` | 已实现稳定核心 | 确定性替身与三个公共合同运行器已实现；Outbox 覆盖重试、租约、失败/尝试预算和深拷贝，Inbox 覆盖非法参数、终态、并发占用和 Consumer 隔离 |
 | `R-06` 仓内门禁 | 已实现 | 八个无绝对路径 `.apidiff` 快照、核心/PostgreSQL 编译夹具、132-case Envelope 行为清单、API/行为负向夹具、独立旧基线比较器和生产依赖图门禁已实现；真实上一发布版本比较要到产生首个后继候选时执行 |
 | `postgres`、`postgres/outbox`、`postgres/inbox` | 已实现 | DB/Transactor、迁移、`CheckSchema`、Outbox/Inbox Store、单元测试、编译夹具和三个 API 快照已建立 |
-| `I-04` | 仓库矩阵通过，CI 待执行 | PostgreSQL 16.12 本地执行真实迁移、合同运行器、20 轮竞争、谓词守卫、SQLSTATE/catalog 负向和 10 万分区计划；受保护 CI 证据依赖 `B-05` |
-| 候选仓内入口 | 已实现 | `candidatecheck` 固定精确 Go/module、module/格式、快照/行为/依赖、八包 apidiff、静态分析和无缓存 PostgreSQL 全量测试；真实受保护 CI 运行仍依赖 `B-05` |
+| `I-04` | 仓库矩阵和基础 CI 通过 | PostgreSQL 16.12 本地矩阵已通过；基础 `Framework CI` run `30563832922` 又在 PostgreSQL 16.12 上通过全部 18 个门禁，但未受 Ruleset 保护，不能作为发布级证据 |
+| 候选仓内入口 | 已实现并在基础 CI 验证 | `candidatecheck` 固定精确 Go/module、module/格式、快照/行为/依赖、八包 apidiff、静态分析和无缓存 PostgreSQL 全量测试；真实受保护 CI 运行仍依赖 `B-05` |
 | 双消费者证明校验 | 已实现内容校验 | 严格 JSON v1 与 `proofcheck` 已覆盖身份、预期 TMS/Parcel 提交、候选/checksum/合同版本、PASS 和时间；证明来源、签名、超时及存储仍依赖 `B-04`/`B-05` |
 | 跨仓候选与发布 | 配置已确认，部署未验证 | Git 仓库和 vanity 解析合同已确认；`B-01B` 的线上验收、`B-04` 至 `B-06` 和真实 TMS/Parcel 候选证明仍未完成 |
 
@@ -87,7 +87,7 @@ Audit date: 2026-07-30
 | `B-02` | 精确 Go、`pgx/v5`、OpenTelemetry、apidiff 与 SemVer 解析版本 | 创建代码基线与依赖锁时 | `BOUND`：Go `1.26.5`、pgx `v5.10.0`、OpenTelemetry API `v1.44.0`、`x/exp v0.0.0-20260727155853-b88d891fe743`、`x/mod v0.38.0`；2026-07-29 由官方端点核验，`x/mod` 原已由工具链间接锁定，现由证明校验直接使用 |
 | `B-03` | PostgreSQL 验证主版本范围 | 首个适配器集成测试前 | `BOUND`：`v0.1` 初始支持 major 16；CI 使用最新稳定 16.x，当前证据为 16.12 |
 | `B-04` | 维护者、消费者代表、安全批准者账号 | 开放共享合并与发布候选前 | `UNBOUND IDENTITIES`：公司 Organization `idp-xyz` 已绑定，但真实维护者、消费者代表和安全批准者账号尚未绑定 |
-| `B-05` | CI 平台、跨仓触发与合同证明存储 | 首个跨仓发布候选前 | `CONFIGURATION BOUND / DEPLOYMENT UNVERIFIED`：GitHub Actions、`workflow_dispatch`、职责分离 GitHub App、Artifact 仅传输、三年 Object Lock Compliance、GitHub OIDC、KMS ECDSA P-256、DSSE 与严格 evidence manifest 已确认；框架 repository ID `1315735832`、Organization owner ID `311024230`、私有可见性和源码提交 `6da1e17e74eeecc9ec120d646642f2f303f4ccbd` 已核验；免费 Organization 不执行私有仓库 Ruleset，Team 账单资料和付款尚未完成，真实 workflow、App、Action SHA、runner/container digest、S3/KMS/OIDC 标识和演练证据仍未绑定 |
+| `B-05` | CI 平台、跨仓触发与合同证明存储 | 首个跨仓发布候选前 | `BASIC CI DEPLOYED / RELEASE DEPLOYMENT UNVERIFIED`：基础 `.github/workflows/ci.yml` 已固定 Action SHA、Go 1.26.5 与 PostgreSQL 16.12 digest，并在提交 `c780c14212aa9ebd367fb9b0379e7d9562360f5a` 的 run `30563832922` 通过；当前明确保持 GitHub Free，私有仓库 Ruleset 不执行，所以该 run 不是受保护发布证据。`workflow_dispatch`、职责分离 GitHub App、WORM/OIDC/KMS/DSSE、Environment、消费者协调和演练仍未部署；Team 或等价受保护平台只在共享合并或首个 RC 前强制选择 |
 | `B-06` | 首发日期、支持矩阵日期和消费者基线提交 | 首个稳定版本前 | `UNBOUND` |
 
 `go.mod`、稳定核心和 PostgreSQL 本地基线已经创建，Git 仓库地址和 vanity 解析合同已经确认；当前没有剩余架构决定阻断代码加固。`B-01B` 剩余的线上部署验收及 `B-04` 至 `B-06` 分别阻断跨仓获取、共享合并、受保护 CI、发布候选或稳定发布。
@@ -121,6 +121,7 @@ Audit date: 2026-07-30
 - 2026-07-30 登录后的 GitHub 设置页进一步确认当前账号没有 Organization，且个人账号不能转换为 Organization；唯一受支持的治理迁移路径是新建公司 Organization 后转移 `idp-bento-go`。目标名称和新 owner ID 在实际创建前保持 `UNBOUND`。
 - 2026-07-30 创建免费 Organization `idp-xyz` 并完成仓库转移；repository ID 保持 `1315735832`，owner ID 更新为 `311024230`，旧 GitHub URL 自动重定向。迁移后 workflow、Ruleset、Environment、tag 均为 0，默认分支保护明确未配置，因此组织所有权已绑定但发布控制面仍未部署。
 - 2026-07-30 将仓库切换为私有，保留远端 Boost Software License 1.0 初始提交，并把通过本地门禁的 113 个源码与文档文件推送到 `main`；远端提交更新为 `6da1e17e74eeecc9ec120d646642f2f303f4ccbd`。同日使用一次性 PostgreSQL 16.9 容器通过 `candidatecheck -initial-v0-1` 的全部 18 个门禁。Ruleset 页面明确提示免费 Organization 不执行私有仓库规则；Team 升级停在账单资料和付款之前，因此不得把默认分支描述为已保护。
+- 2026-07-31 部署基础 `Framework CI`，固定第三方 Action 完整 SHA、Go 1.26.5 与 PostgreSQL 16.12 manifest digest。首次 run `30560728007` 暴露 Windows 生成的 `testkit` export data 与 Linux runner 不一致；提交 `c780c14212aa9ebd367fb9b0379e7d9562360f5a` 将 snapshot 生成和当前包加载统一到 `linux/amd64`、`CGO_ENABLED=0`，run `30563832922` 随后通过全部 18 个门禁。用户确认保持 GitHub Free、不购买 Team；该 CI 未受 Ruleset 保护，不能授权 RC 或稳定发布。
 
 ## 推荐完成顺序
 
@@ -129,8 +130,9 @@ Audit date: 2026-07-30
 3. 已完成仓库矩阵：在 PostgreSQL 16.12 上执行 `I-04`；受保护 CI 复跑仍依赖 `B-05`。
 4. 已完成仓内候选入口：`candidatecheck` 强制真实 PostgreSQL DSN、无缓存测试和显式初始/旧基线模式。
 5. 已完成私有远端源码基线：保留初始许可证历史，将完整源码推送到 `idp-xyz/idp-bento-go` 的 `main`，并核验远端提交。
-6. 下一阶段：完成 GitHub Team 账单、创建并验证默认分支 Ruleset，再部署 `B-01B` 的 vanity 解析并绑定 `B-04` 至 `B-06`；由受保护 CI 调用候选入口，创建不可变 RC 并收集 TMS、Parcel 对同一 checksum 的证明。
+6. 已完成基础 CI：未受保护的 GitHub Actions 在精确 Go/PostgreSQL 基线上通过全部 18 个门禁。
+7. 下一阶段：保持 GitHub Free，先部署并验收 `B-01B` vanity 解析，绑定 `B-04`/`B-06` 身份与消费者基线，并准备 TMS、Parcel 合同入口；开放共享合并或创建首个 RC 前，再选择 GitHub Team 或满足同一保护合同的等价平台，建立 Ruleset、Environment、WORM 和发布身份。
 
 ## 下一步
 
-`v0.1` 实现基线、PostgreSQL 16.12 仓库验收、私有 Git 远端源码基线和 vanity 解析合同已经完成。下一推荐阶段是完成 GitHub Team 账单并建立可执行 Ruleset，然后部署解析基础设施、绑定治理身份和受保护 CI，在同一不可变 RC 上执行框架、TMS 和 Parcel 的候选合同。
+`v0.1` 实现基线、PostgreSQL 16.12 仓库验收、私有 Git 远端源码基线、基础 GitHub Actions CI 和 vanity 解析合同已经完成。下一推荐阶段是部署 `go.idp.xyz` 解析基础设施并绑定治理身份与消费者基线；受保护平台的付费或迁移选择推迟到开放共享合并或首个 RC 之前，不影响当前继续开发。

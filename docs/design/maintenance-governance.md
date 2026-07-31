@@ -16,7 +16,8 @@
 | GitHub 仓库组织所有权 | `BOUND`：Organization `idp-xyz`，owner ID `311024230`；框架 repository ID `1315735832` |
 | 维护者真实姓名与账号 | `UNBOUND` |
 | 消费者代表真实姓名与账号 | `UNBOUND` |
-| CI 平台 | `CONFIRMED`：GitHub Actions |
+| CI 平台 | `BASIC CI DEPLOYED / RELEASE UNVERIFIED`：GitHub Actions run `30563832922` 已通过仓内 18 门禁，但未受 Ruleset 保护 |
+| 默认分支与稳定 tag 保护 | `UNBOUND`：当前保持 GitHub Free，私有仓库 Ruleset 不执行；开放共享合并或首个 RC 前选择 Team 或等价受保护平台 |
 | CI 发布身份与密钥托管实现 | `CONFIGURATION BOUND / DEPLOYMENT UNVERIFIED`：两类 GitHub App、GitHub OIDC、三年 Compliance Lock、KMS ECDSA P-256 和 DSSE 权限模型已确认；真实 App、角色、key 与存储未绑定 |
 | 版本支持期限模型 | `CONFIRMED` |
 

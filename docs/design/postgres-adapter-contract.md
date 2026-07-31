@@ -28,7 +28,7 @@
 - `R-04-B` 已确认默认 `bento` schema、`outbox`、`outbox_partition`、`inbox` 三张表的完整 DDL、约束和索引；规范来源为 [PostgreSQL 技术表 DDL 决策简报](./postgres-schema-ddl-decision-brief.md)。
 - `R-04-C` 已确认同分区并发 Enqueue、Claim、Finalize、Inbox 和指针修复 SQL；规范来源为 [PostgreSQL 并发 SQL 与锁顺序决策简报](./postgres-concurrency-sql-decision-brief.md)。
 - `R-04-D` 已确认迁移模板渲染、checksum、schema 标识符与 `CheckSchema` 对象集合；规范来源为 [PostgreSQL 迁移渲染与 schema 检查决策简报](./postgres-migration-schema-decision-brief.md)。
-- `R-04-E` 已保存 PostgreSQL 16.12 的 DDL、并发、负向、catalog 与执行计划设计证据；真实实现的仓库内 `I-04` 矩阵已于 2026-07-30 通过，受保护 CI 证据仍待 `B-05` 绑定后执行。
+- `R-04-E` 已保存 PostgreSQL 16.12 的 DDL、并发、负向、catalog 与执行计划设计证据；真实实现的仓库内 `I-04` 矩阵已于 2026-07-30 通过，基础 GitHub Actions 又于 2026-07-31 通过，受保护 CI 证据仍待 `B-05` 完全绑定后执行。
 
 ## 技术 schema 与表名
 
@@ -331,7 +331,7 @@ metric 至少覆盖：事务开始/提交/回滚计数与耗时、Outbox 待发�
 
 - `B-02` 已绑定：`pgx/v5 v5.10.0` 与 OpenTelemetry API `v1.44.0` 已作为直接依赖进入 `go.mod`/`go.sum`。
 - `B-03` 已绑定：`v0.1` 初始支持 PostgreSQL major 16，当前设计与本地实现证据均为 16.12；增加其他 major 前必须重跑完整矩阵。
-- `B-05` 配置已确认、部署未验证：GitHub Actions、跨仓触发、三年 Object Lock Compliance、OIDC、KMS/DSSE 与 evidence manifest 已固定，但真实 workflow、App、runner/container、S3/KMS/OIDC 标识和演练仍未绑定，继续阻断发布级 `I-04` 证据与 RC。
+- `B-05` 基础 CI 已部署、发布部署未验证：基础 `Framework CI` run `30563832922` 已通过，但未受 Ruleset 保护；跨仓触发、候选/发布 workflow、App、Environment、S3/KMS/OIDC 标识和演练仍未绑定，继续阻断发布级 `I-04` 证据与 RC。
 
 ## 下一步
 

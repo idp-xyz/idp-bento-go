@@ -1,12 +1,12 @@
 # GitHub Actions 候选与发布合同
 
-状态：配置已确认；框架仓库与组织所有权已绑定；发布部署未验证
+状态：配置已确认；基础框架 CI 已部署并通过；发布部署未验证
 
-日期：2026-07-30
+日期：2026-07-31
 
 ## 主题与范围
 
-本文确认 `B-05` 的 CI 平台、跨仓候选协调方式、最小权限边界、消费者证明来源校验和持久化要求。本文不创建 GitHub workflow、App、Environment、Ruleset、secret、外部证据存储、tag 或 RC，也不访问 TMS/Parcel 仓库。
+本文确认 `B-05` 的 CI 平台、跨仓候选协调方式、最小权限边界、消费者证明来源校验和持久化要求，并记录已经部署的基础框架 CI。本文不创建 GitHub App、Environment、Ruleset、secret、外部证据存储、tag 或 RC，也不访问 TMS/Parcel 仓库。
 
 ## 已确认决定
 
@@ -31,6 +31,8 @@ GitHub Actions 是可替换的发布基础设施，不改变 Go module identity�
 - 默认 `GITHUB_TOKEN` 权限为 `contents: read`；不授予 `contents: write`、`actions: write`、`id-token: write` 或跨仓 App 凭据。
 - 执行格式、module 整理、snapshot/manifest、依赖图、apidiff、`go vet`、单元测试和 PostgreSQL 16 集成矩阵。
 - 第三方 Action 固定完整 commit SHA；runner 镜像和 PostgreSQL 容器固定可审计版本，候选阶段不得使用浮动 `@main`、`@vN` 或未固定容器 digest。
+
+当前 `.github/workflows/ci.yml` 已实现上述仓内门禁：`contents: read`，事件为 `pull_request` 与 `main` push，固定 `actions/checkout`、`actions/setup-go` 完整 SHA、Go `1.26.5` 和 PostgreSQL `16.12` manifest digest。2026-07-31 的 run `30563832922` 在提交 `c780c14212aa9ebd367fb9b0379e7d9562360f5a` 上通过全部 18 个门禁。由于 GitHub Free 不执行私有仓库 Ruleset，该 workflow 只提供基础开发反馈，不是受保护的候选或稳定发布证据。
 
 ### 框架候选
 
@@ -129,12 +131,13 @@ Object Lock 模式、三年保留、对象前缀、OIDC subject、ECDSA P-256 �
 
 ## 已核验外部事实
 
-2026-07-30 通过 GitHub API、Git transport 与登录后的仓库设置页完成核验：
+2026-07-30 至 2026-07-31 通过 GitHub API、Git transport、Actions 运行页与登录后的仓库设置页完成核验：
 
 - 框架仓库 owner/name 为 `idp-xyz/idp-bento-go`，repository ID 为 `1315735832`，Organization owner ID 为 `311024230`，当前为私有仓库，默认分支为 `main`。
 - 迁移前个人 owner ID 为 `310467973`；GitHub 不支持把个人账号转换为 Organization，因此创建 `idp-xyz` 后转移仓库。旧 URL 已验证自动重定向到新地址。
-- 完整源码推送后，远端 `HEAD` 与 `refs/heads/main` 均指向 `6da1e17e74eeecc9ec120d646642f2f303f4ccbd`；该观测值可变，不是 `B-06` 基线或发布授权。
-- 迁移后 Actions workflow、Ruleset、Environment 和 tag 的 API 结果均为空。私有化后的 Ruleset 页面继续确认当前没有 Ruleset，并明确提示免费 Organization 的私有仓库规则不会执行，必须升级 GitHub Team；账单资料和付款尚未完成，因此默认分支保护和发布控制面仍未部署。
+- 基础 CI 修复推送后，远端 `main` 指向 `c780c14212aa9ebd367fb9b0379e7d9562360f5a`；该观测值可变，不是 `B-06` 基线或发布授权。
+- `Framework CI` run `30563832922` 已成功，证明基础 workflow 能在固定 PostgreSQL 16.12 环境运行仓内 18 门禁。Environment、tag 与发布控制面仍未部署。
+- Ruleset 页面明确提示 GitHub Free 不执行私有仓库规则。用户已确认保持 Free、不购买 Team；因此默认分支仍未受保护，Team 或等价受保护平台只在开放共享合并或首个 RC 前成为强制选择。
 
 ## 剩余外部绑定
 
@@ -147,4 +150,4 @@ Object Lock 模式、三年保留、对象前缀、OIDC subject、ECDSA P-256 �
 - `release-candidate`、`stable-release` Environment、Ruleset、审批人与稳定 tag 保护的实际配置。
 - 一次不含真实发布的失败路径演练，以及首次 RC 的完整受保护运行证据。
 
-框架仓库与公司 Organization 所有权已经绑定，但发布控制面尚未部署；不创建占位 workflow，也不伪造其余外部标识。
+框架仓库、公司 Organization 所有权和基础 CI 已经绑定，但发布控制面尚未部署；不创建占位发布 workflow，也不伪造其余外部标识。
