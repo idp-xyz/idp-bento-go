@@ -38,6 +38,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+
+      # Verifies signatures against .github/allowed_signers, so it holds without
+      # depending on GitHub having the key registered for the signing scope.
+      - name: Verify commit signatures
+        run: |
+          git config gpg.ssh.allowedSignersFile "$GITHUB_WORKSPACE/.github/allowed_signers"
+          base='${{ github.event.pull_request.base.sha }}'
+          if [ -z "$base" ]; then base="$(git rev-parse HEAD~1 2>/dev/null || echo '')"; fi
+          if [ -z "$base" ]; then echo "no baseline commit; nothing to verify"; exit 0; fi
+          # --no-merges skips the throwaway merge commit GitHub synthesises for
+          # pull_request checks. It never reaches the default branch and cannot
+          # carry a signature.
+          status=0
+          for commit in $(git rev-list --no-merges "$base..HEAD"); do
+            state="$(git log -1 --format='%G?' "$commit")"
+            printf '%s %s\n' "$state" "$commit"
+            case "$state" in G) ;; *) status=1 ;; esac
+          done
+          if [ "$status" -ne 0 ]; then
+            echo "::error::every commit must carry a signature that .github/allowed_signers verifies"
+          fi
+          exit "$status"
 
       - name: Set up Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0

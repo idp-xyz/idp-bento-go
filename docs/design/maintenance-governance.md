@@ -67,6 +67,7 @@
 机器门禁覆盖的部分——它们与维护者人数无关，一人也无法绕过：
 
 - `candidatecheck` 的仓内候选门禁，含精确工具链、module 身份、apidiff、行为清单、依赖图与无缓存全量测试。默认分支要求经 PR 合并且 `Candidate gates` 通过，所以这道门禁在改动落地之前拦截，而不是事后报告。
+- 提交签名：CI 对每个新提交校验 SSH 签名，信任根是仓库内的 `.github/allowed_signers`。该文件受同一套 PR 门禁保护，所以增删签名者本身也要过一次门禁。此项只对本机制启用之后的提交成立，既有历史无签名，追溯校验会失败，因此不作追溯要求。
 - `proofcheck` 对同一候选、同一合同套件版本的双消费者比对。
 - `evidencecheck` 对 manifest、原始证明摘要、来源字段与协调时间窗的校验。
 - tag Ruleset 防移动、WORM `COMPLIANCE` 三年保留、DSSE 绑定版本与目标提交。
