@@ -1,8 +1,8 @@
 # `idp-bento-go` 候选前置门禁运行手册
 
-状态：仓内入口已实现；外部发布绑定未完成
+状态：仓内入口已实现；首个不可变候选已创建；外部发布绑定未完成
 
-日期：2026-07-30
+日期：2026-07-31
 
 ## 目标与边界
 
@@ -74,4 +74,19 @@ go run ./internal/cmd/candidatecheck -baseline D:\artifacts\idp-bento-go\<前序
 
 ## 当前状态
 
-候选入口、前置失败测试、18/19 步编排测试和停止传播测试已经实现。2026-07-31，基础 `Framework CI` run `30563832922` 使用 PostgreSQL 16.12 通过 `-initial-v0-1` 的全部 18 个门禁；该 run 来自未受 Ruleset 保护的 `main` push，只证明基础 CI 可执行，不等于受保护 CI 候选证明。
+候选入口、前置失败测试、18/19 步编排测试和停止传播测试已经实现。
+
+2026-07-31，`main` HEAD `af68525` 上的基础 `Framework CI` run `30616180483` 使用 PostgreSQL 16.12 通过 `-initial-v0-1` 的全部 18 个门禁，本地在 PostgreSQL 16.14 上复验同样通过。该 run 来自未受 Ruleset 保护的 `main` push，只证明基础 CI 可执行，不等于受保护 CI 候选证明。
+
+同日在该提交上创建首个不可变候选 tag `v0.1.0-rc.1`。它的唯一用途是让 TMS 与 Parcel 锁定精确版本并运行消费者合同：
+
+| 项目 | 状态 |
+| --- | --- |
+| `v0.1.0-rc.1` tag 与空缓存下载证明 | 已完成，见[module 解析与 vanity 合同](./module-resolution-contract.md) |
+| TMS 消费者合同（`tests/bentocontract`，提交 `f8eb9c3`） | 已通过 TBC-01 至 TBC-05 |
+| Parcel 消费者合同 | 未建立 |
+| 受保护候选 workflow、App、证明存储与 provenance（`B-05`） | 未绑定 |
+| `proofcheck` / `evidencecheck`、WORM Compliance Lock 与 DSSE 回执 | 未执行 |
+| 24 小时冷静期与新 CI run 复验 | 未开始 |
+
+因此当前只有一个不可变候选，没有稳定版本。`v0.1.0-rc.1` 不得被描述为已发布 `v0.x`，其消费者合同结果也不得替代受保护 CI 证明。后续候选必须改用 `-baseline`，不得再使用 `-initial-v0-1`。

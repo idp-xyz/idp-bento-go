@@ -2,7 +2,7 @@
 
 ## 架构文档
 
-对重要框架决定使用 `grill-with-docs`。通过 `grilling` 一次确认一个决定，并使用 `domain-modeling` 保护消费者的所有权边界。
+重要框架决定先走 `flow-grilling`。
 
 - `docs/design/` 拥有框架目标、包边界、兼容性契约、发布风险和未决问题。
 - `docs/adr/` 只记录已经接受、难以逆转且存在真实替代方案的技术决定。

@@ -70,9 +70,25 @@
 5. TMS、Parcel 的最小合同作业分别从正式 module path 编译，不从本地目录、GitHub module path 或源码副本取代候选。
 6. 受保护 CI 保存解析响应摘要、DNS/TLS 检查、候选版本、完整框架提交、module checksum、Git origin 和作业时间；不得保存访问凭据或源码制品。
 
-验收命令中的 RC 版本和凭据只能使用真实外部值。当前没有不可变 RC，因此本文不提供伪造的成功输出。
+验收命令中的 RC 版本和凭据只能使用真实外部值。本文不提供伪造的成功输出。
 
-截至 2026-07-31，第 1、2 项已经通过实际公网验收：Google 公共 DNS 返回 `go.idp.xyz A 8.133.22.7`；Let's Encrypt ECDSA 证书的 SAN 为 `go.idp.xyz`，有效期至 2026-10-29；module 根路径、`domain` 真实公共包子路径和额外的 `postgres/outbox` 子路径均返回 `200`，且只包含一个精确 metadata。第 3 至 6 项仍被“没有真实不可变 `v0.1.0-rc.N`、消费者身份和受保护证明作业”阻断，所以 `B-01B` 尚未整体升级为 `BOUND`。
+截至 2026-07-31，第 1 至 4 项已经通过实际验收。
+
+第 1、2 项公网验收：Google 公共 DNS 返回 `go.idp.xyz A 8.133.22.7`；Let's Encrypt ECDSA 证书的 SAN 为 `go.idp.xyz`，有效期至 2026-10-29；module 根路径、`domain` 真实公共包子路径和额外的 `postgres/outbox` 子路径均返回 `200`，且只包含一个精确 metadata。
+
+第 3、4 项在首个不可变候选 `v0.1.0-rc.1` 上验收。空 `GOMODCACHE`、空 `GOCACHE`、无 `replace`、`GOPRIVATE=go.idp.xyz`、`GOPROXY=direct`、`GIT_TERMINAL_PROMPT=0` 环境下，`go mod download -json go.idp.xyz/idp-bento-go@v0.1.0-rc.1` 返回：
+
+| 字段 | 值 |
+| --- | --- |
+| `Path` | `go.idp.xyz/idp-bento-go` |
+| `Version` | `v0.1.0-rc.1` |
+| `Sum` | `h1:lx/snQkwUQW5pWPOgNI4AsZrSxxi0YYqHfOemsgEuLQ=` |
+| `GoModSum` | `h1:RFR6ylLNIIA7e4PPGVCzojYiH6DB8eHd2s5vI9XcUgY=` |
+| `Origin.URL` | `https://github.com/idp-xyz/idp-bento-go.git` |
+| `Origin.Ref` | `refs/tags/v0.1.0-rc.1` |
+| `Origin.Hash` | `af68525c1d08fccae13eccd01f209465959673d6` |
+
+第 5 项已由 TMS 单侧满足：`idp-tms` 在提交 `f8eb9c3` 锁定该精确候选，`tests/bentocontract` 从正式 module path 编译并比对 checksum 通过。Parcel 侧合同作业尚未建立，因此第 5 项整体未完成，第 6 项也未开始，`B-01B` 尚未整体升级为 `BOUND`。
 
 ## 失败关闭规则
 
@@ -92,7 +108,9 @@
 
 ## 当前状态
 
-解析方式、精确元数据和验收标准已经确认。2026-07-30 创建公司 Organization `idp-xyz` 并将仓库迁移到私有仓库 `https://github.com/idp-xyz/idp-bento-go`；repository ID 保持 `1315735832`，owner ID 变为 `311024230`，旧 URL 自动重定向。远端仍无 tag。
+解析方式、精确元数据和验收标准已经确认。2026-07-30 创建公司 Organization `idp-xyz` 并将仓库迁移到私有仓库 `https://github.com/idp-xyz/idp-bento-go`；repository ID 保持 `1315735832`，owner ID 变为 `311024230`，旧 URL 自动重定向。
+
+2026-07-31 创建首个不可变候选 tag `v0.1.0-rc.1`，指向提交 `af68525c1d08fccae13eccd01f209465959673d6`。该 tag 不得移动或删除；同一版本产生不同 checksum 按发布安全事件处理。
 
 2026-07-31 已在 `8.133.22.7` 完成实际部署：宿主 Nginx 独占 80/443 和 TLS，反向代理到只绑定 `127.0.0.1:8188` 的 `idp-bento-go-vanity` 容器；容器以 `101:101` 非 root 身份运行，根文件系统只读、删除全部 capabilities 且不含 GitHub 凭据。运行镜像 ID 为 `sha256:1cd9d483d3a89dca40fc492211d94fadbc7f22cc49c8a6d467120d34ccb29a27`，基础镜像固定为官方 `nginx@sha256:7068961d45b07b2af510ac002e9daa63a1d3eba2111202d6768798690800fffd`。部署材料位于 `infra/vanity/`。
 

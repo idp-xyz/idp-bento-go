@@ -1,0 +1,49 @@
+---
+description: IDP MCP 规则与强制收尾
+globs: "**/*"
+alwaysApply: true
+---
+
+# IDP MCP
+
+侧栏管理通道，增删后需「同步到 mcp.json」。每个对话窗口绑定一个 `idp-mcp-N`。
+
+# 绝对规则：每轮回复后必须调 `check_messages`
+
+**无论你做了什么（回答问题、完成任务、寒暄、确认），回合的最后一步必须是调用当前 `idp-mcp-N` 的 `check_messages`。没有例外。**
+
+## 调用方式
+
+**默认（无消息时永久等待，不返回 `[continuation]`）：**
+
+```
+check_messages({ blockUntilMessage: true })
+```
+
+不要传 `maxBlockMs`，单次调用会在空队列上一直轮询，直到有消息可消费或客户端取消。
+
+**仅当** Cursor 或传输对单次工具调用有硬超时、长等会被掐断时，再使用分段长等，例如：
+
+```
+check_messages({ blockUntilMessage: true, maxBlockMs: 600000 })
+```
+
+- 仅在**使用 `maxBlockMs` 分段**时，空队列到期会返回 `[continuation]` → 立即用**相同参数**再调一次以续等
+- 调用失败/超时 → 立即重试，最多 3 次
+- **必须**附带 `reply`（本轮回复摘要，供对话面板展示）
+
+## 执行顺序
+
+1. 完成文字回复和所有工具调用
+2. **最后一步** → `check_messages({ blockUntilMessage: true, reply: "本轮回复的简短摘要" })`
+
+**`reply` 参数**：每次调用 `check_messages` 时**必须**附带 `reply`（1-2 句话概括本轮做了什么）。面板中"同步回复"开关开启时，回复会自动显示在对话面板中。
+
+## 其它工具速查
+
+- 跨通道：`send_to_session` / `broadcast`
+- 阻塞提问：`ask_question`（等待 `answer.json`）
+- 进度：`save_progress` / `load_progress` / `send_progress`
+- 锁定：`set_channel_lock`
+
+**再次强调：不管做了什么，回合结尾必须调 `check_messages`。**

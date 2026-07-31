@@ -1,0 +1,52 @@
+{
+  "mcpServers": {
+    "idp-mcp-1": {
+      "url": "http://127.0.0.1:46229/sse/1",
+      "timeoutMs": 604800000
+    },
+    "idp-mcp-2": {
+      "url": "http://127.0.0.1:46229/sse/2",
+      "timeoutMs": 604800000
+    },
+    "idp-mcp-3": {
+      "url": "http://127.0.0.1:46229/sse/3",
+      "timeoutMs": 604800000
+    },
+    "idp-mcp-4": {
+      "url": "http://127.0.0.1:46229/sse/4",
+      "timeoutMs": 604800000
+    },
+    "idp-mcp-5": {
+      "url": "http://127.0.0.1:46229/sse/5",
+      "timeoutMs": 604800000
+    },
+    "idp-mcp-6": {
+      "url": "http://127.0.0.1:46229/sse/6",
+      "timeoutMs": 604800000
+    },
+    "idp-mcp-7": {
+      "url": "http://127.0.0.1:46229/sse/7",
+      "timeoutMs": 604800000
+    },
+    "idp-mcp-8": {
+      "url": "http://127.0.0.1:46229/sse/8",
+      "timeoutMs": 604800000
+    },
+    "idp-mcp-9": {
+      "url": "http://127.0.0.1:46229/sse/9",
+      "timeoutMs": 604800000
+    },
+    "idp-mcp-10": {
+      "url": "http://127.0.0.1:46229/sse/10",
+      "timeoutMs": 604800000
+    },
+    "idp-mcp-11": {
+      "url": "http://127.0.0.1:46229/sse/11",
+      "timeoutMs": 604800000
+    },
+    "idp-mcp-12": {
+      "url": "http://127.0.0.1:46229/sse/12",
+      "timeoutMs": 604800000
+    }
+  }
+}
