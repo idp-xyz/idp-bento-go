@@ -18,7 +18,7 @@
 | 维护者真实姓名与账号 | `UNBOUND` |
 | 消费者代表真实姓名与账号 | `UNBOUND` |
 | CI 平台 | `BASIC CI DEPLOYED / RELEASE UNVERIFIED`：GitHub Actions run `30563832922` 已通过仓内 18 门禁，但未受 Ruleset 保护 |
-| 默认分支与稳定 tag 保护 | `BOUND`：仓库已公开，GitHub Free 对公开仓库执行 Ruleset。`protected-main` 禁止强推与删除默认分支，`immutable-release-tags` 对 `refs/tags/v*` 禁止移动与删除，均已实测拦截 |
+| 默认分支与稳定 tag 保护 | `BOUND`：仓库已公开，GitHub Free 对公开仓库执行 Ruleset。`protected-main` 要求经 PR 合并且 `Candidate gates` 通过，并禁止强推与删除默认分支；`immutable-release-tags` 对 `refs/tags/v*` 禁止移动与删除。全部已实测拦截，PR 正常路径亦实测通行 |
 | CI 发布身份与密钥托管实现 | `CONFIGURATION BOUND / DEPLOYMENT UNVERIFIED`：两类 GitHub App、GitHub OIDC、三年 Compliance Lock、KMS ECDSA P-256 和 DSSE 权限模型已确认；真实 App、角色、key 与存储未绑定 |
 | 版本支持期限模型 | `CONFIRMED` |
 
@@ -66,7 +66,7 @@
 
 机器门禁覆盖的部分——它们与维护者人数无关，一人也无法绕过：
 
-- `candidatecheck` 的仓内候选门禁，含精确工具链、module 身份、apidiff、行为清单、依赖图与无缓存全量测试。
+- `candidatecheck` 的仓内候选门禁，含精确工具链、module 身份、apidiff、行为清单、依赖图与无缓存全量测试。默认分支要求经 PR 合并且 `Candidate gates` 通过，所以这道门禁在改动落地之前拦截，而不是事后报告。
 - `proofcheck` 对同一候选、同一合同套件版本的双消费者比对。
 - `evidencecheck` 对 manifest、原始证明摘要、来源字段与协调时间窗的校验。
 - tag Ruleset 防移动、WORM `COMPLIANCE` 三年保留、DSSE 绑定版本与目标提交。
