@@ -2,7 +2,7 @@
 
 状态：设计已确认；基础设施部署未验证
 
-日期：2026-07-30
+日期：2026-07-31
 
 ## 主题与范围
 
@@ -90,4 +90,4 @@
 
 ## 当前状态
 
-解析方式、精确元数据和验收标准已经确认。2026-07-30 创建公司 Organization `idp-xyz` 并将仓库迁移到 `https://github.com/idp-xyz/idp-bento-go`；repository ID 保持 `1315735832`，owner ID 变为 `311024230`，旧 URL 自动重定向。远端仍无 tag；同日 DNS 查询对 `go.idp.xyz` 返回 `NXDOMAIN`，因此 TLS、线上元数据和空缓存真实 RC 下载均无法执行。`B-01B` 继续阻断跨仓候选与发布，且不得把当前可移动的 `main` 提交当作候选基线。
+解析方式、精确元数据和验收标准已经确认。2026-07-30 创建公司 Organization `idp-xyz` 并将仓库迁移到 `https://github.com/idp-xyz/idp-bento-go`；repository ID 保持 `1315735832`，owner ID 变为 `311024230`，旧 URL 自动重定向。远端仍无 tag。2026-07-31 通过 Google 公共 DNS-over-HTTPS 查询 `go.idp.xyz` 返回 `Status: 3 (NXDOMAIN)`；本地解析器返回的 `198.18.0.125` 属于测试网段，且 HTTPS TLS 握手失败，不能作为部署证据。TLS、线上元数据和空缓存真实 RC 下载均无法执行。`B-01B` 继续阻断跨仓候选与发布，且不得把当前可移动的 `main` 提交当作候选基线。
