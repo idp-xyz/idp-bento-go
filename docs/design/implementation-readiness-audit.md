@@ -8,7 +8,7 @@ Audit date: 2026-07-31
 
 框架的产品边界、仓库边界、Repository 策略、迁移所有权、消费者合同、治理、版本支持、可观测性以及 `R-01` 至 `R-06` 的公共设计合同已完成。五个稳定核心包、三个实验性 PostgreSQL 包、迁移资产、`testkit` 合同运行器和本地兼容性制品均已实现。
 
-当前仓库已经达到“开发人员无需补充公共架构判断即可使用和继续加固 `v0.1` 基线”的标准。PostgreSQL 16.12 仓库矩阵和未受保护的基础 GitHub Actions CI 已经通过，实际 Git 仓库和 vanity 解析合同已确认；受保护 CI、线上解析部署、候选治理和双消费者证明仍由外部绑定阻断。这些是发布与组织门禁，不是遗留设计歧义。
+当前仓库已经达到“开发人员无需补充公共架构判断即可使用和继续加固 `v0.1` 基线”的标准。PostgreSQL 16.12 仓库矩阵和未受保护的基础 GitHub Actions CI 已经通过，实际 Git 仓库以及 vanity DNS、TLS、metadata 部署已经验证；受保护 CI、真实不可变 RC 获取、候选治理和双消费者证明仍由外部绑定阻断。这些是发布与组织门禁，不是遗留设计歧义。
 
 ## 当前实现状态
 
@@ -21,7 +21,7 @@ Audit date: 2026-07-31
 | `I-04` | 仓库矩阵和基础 CI 通过 | PostgreSQL 16.12 本地矩阵已通过；基础 `Framework CI` run `30563832922` 又在 PostgreSQL 16.12 上通过全部 18 个门禁，但未受 Ruleset 保护，不能作为发布级证据 |
 | 候选仓内入口 | 已实现并在基础 CI 验证 | `candidatecheck` 固定精确 Go/module、module/格式、快照/行为/依赖、八包 apidiff、静态分析和无缓存 PostgreSQL 全量测试；真实受保护 CI 运行仍依赖 `B-05` |
 | 双消费者证明校验 | 已实现内容校验 | 严格 JSON v1 与 `proofcheck` 已覆盖身份、预期 TMS/Parcel 提交、候选/checksum/合同版本、PASS 和时间；证明来源、签名、超时及存储仍依赖 `B-04`/`B-05` |
-| 跨仓候选与发布 | 配置已确认，部署未验证 | Git 仓库和 vanity 解析合同已确认；`B-01B` 的线上验收、`B-04` 至 `B-06` 和真实 TMS/Parcel 候选证明仍未完成 |
+| 跨仓候选与发布 | 解析基础设施已部署，真实 RC 未验证 | Git 仓库、公共 DNS、TLS、精确 vanity metadata 和自动续期已验证；`B-01B` 的真实不可变 RC 空缓存下载、`B-04` 至 `B-06` 和真实 TMS/Parcel 候选证明仍未完成 |
 
 ## 已达到可编码精度的部分
 
@@ -83,7 +83,7 @@ Audit date: 2026-07-31
 | ID | 项目 | 何时必须绑定 | 当前状态 |
 | --- | --- | --- | --- |
 | `B-01A` | 正式 Go module path | 创建 `go.mod` 前 | `BOUND`：`go.idp.xyz/idp-bento-go`；不再阻断本地代码脚手架 |
-| `B-01B` | 实际 Git 地址及 `go.idp.xyz` 的 vanity metadata 或私有 GOPROXY 路由 | 首次跨仓获取候选前 | `CONFIGURATION BOUND / DEPLOYMENT UNVERIFIED`：Git 仓库为 `https://github.com/idp-xyz/idp-bento-go`；`v0.1` 使用 HTTPS vanity metadata 直连该仓库，不引入私有 GOPROXY；最新 Google 公共 DNS-over-HTTPS 已返回 `go.idp.xyz A 8.133.22.7`，但 80/443 在 HTTP/TLS 握手阶段主动关闭，尚无可验证 metadata，空缓存真实 RC 下载仍不可执行 |
+| `B-01B` | 实际 Git 地址及 `go.idp.xyz` 的 vanity metadata 或私有 GOPROXY 路由 | 首次跨仓获取候选前 | `ROUTING/TLS/METADATA DEPLOYED / RC DOWNLOAD UNVERIFIED`：Git 仓库为 `https://github.com/idp-xyz/idp-bento-go`；Google 公共 DNS 返回 `go.idp.xyz A 8.133.22.7`；Let's Encrypt ECDSA TLS、自动续期、module 根路径和真实公共包子路径的唯一精确 metadata 已通过公网验收。当前无不可变 `v0.1.0-rc.N`、私有 Git 读取身份和双消费者证明，所以空缓存真实 RC 下载仍不可执行，`B-01B` 尚未整体 `BOUND` |
 | `B-02` | 精确 Go、`pgx/v5`、OpenTelemetry、apidiff 与 SemVer 解析版本 | 创建代码基线与依赖锁时 | `BOUND`：Go `1.26.5`、pgx `v5.10.0`、OpenTelemetry API `v1.44.0`、`x/exp v0.0.0-20260727155853-b88d891fe743`、`x/mod v0.38.0`；2026-07-29 由官方端点核验，`x/mod` 原已由工具链间接锁定，现由证明校验直接使用 |
 | `B-03` | PostgreSQL 验证主版本范围 | 首个适配器集成测试前 | `BOUND`：`v0.1` 初始支持 major 16；CI 使用最新稳定 16.x，当前证据为 16.12 |
 | `B-04` | 维护者、消费者代表、安全批准者账号 | 开放共享合并与发布候选前 | `UNBOUND IDENTITIES`：公司 Organization `idp-xyz` 已绑定，但真实维护者、消费者代表和安全批准者账号尚未绑定 |
@@ -123,7 +123,7 @@ Audit date: 2026-07-31
 - 2026-07-30 将仓库切换为私有，保留远端 Boost Software License 1.0 初始提交，并把通过本地门禁的 113 个源码与文档文件推送到 `main`；远端提交更新为 `6da1e17e74eeecc9ec120d646642f2f303f4ccbd`。同日使用一次性 PostgreSQL 16.9 容器通过 `candidatecheck -initial-v0-1` 的全部 18 个门禁。Ruleset 页面明确提示免费 Organization 不执行私有仓库规则；Team 升级停在账单资料和付款之前，因此不得把默认分支描述为已保护。
 - 2026-07-31 部署基础 `Framework CI`，固定第三方 Action 完整 SHA、Go 1.26.5 与 PostgreSQL 16.12 manifest digest。首次 run `30560728007` 暴露 Windows 生成的 `testkit` export data 与 Linux runner 不一致；提交 `c780c14212aa9ebd367fb9b0379e7d9562360f5a` 将 snapshot 生成和当前包加载统一到 `linux/amd64`、`CGO_ENABLED=0`，run `30563832922` 随后通过全部 18 个门禁。用户确认保持 GitHub Free、不购买 Team；该 CI 未受 Ruleset 保护，不能授权 RC 或稳定发布。
 - 2026-07-31 通过 Google 公共 DNS-over-HTTPS 对 `go.idp.xyz` 做只读交叉核验，返回 `Status: 3 (NXDOMAIN)`；本地解析器返回 `198.18.0.125` 且 HTTPS TLS 握手失败，判定为环境/测试网段结果，不能升级 `B-01B`。下一动作属于域名/平台维护方：部署有效 DNS、公开 TLS 和精确 `go-import` 元数据后，按合同执行空缓存 RC 下载验收。
-- 2026-07-31 后续核验发现公共 DNS 已传播 `go.idp.xyz A 8.133.22.7`，且 80/443 TCP 端口可达，但 HTTP 请求和 TLS 握手均被服务器主动关闭；DNS 已有记录，Web/vanity 服务仍未部署。下一动作属于域名/平台维护方：在该现有服务上配置有效 TLS 和精确 `go-import` 元数据后，按合同执行空缓存 RC 下载验收。
+- 2026-07-31 在 `8.133.22.7` 部署独立、非 root、只读且仅绑定 `127.0.0.1:8188` 的 vanity 容器，由宿主 Nginx 终止 TLS 并反向代理；Let's Encrypt ECDSA 证书、certbot 自动续期、HTTP 到 HTTPS 跳转、module 根路径、`domain` 与 `postgres/outbox` 子路径的唯一精确 metadata 均通过公网验收。`B-01B` 的剩余阻断收窄为真实不可变 RC、私有 Git 读取身份、空缓存下载和双消费者受保护证明。
 
 ## 推荐完成顺序
 
@@ -133,8 +133,9 @@ Audit date: 2026-07-31
 4. 已完成仓内候选入口：`candidatecheck` 强制真实 PostgreSQL DSN、无缓存测试和显式初始/旧基线模式。
 5. 已完成私有远端源码基线：保留初始许可证历史，将完整源码推送到 `idp-xyz/idp-bento-go` 的 `main`，并核验远端提交。
 6. 已完成基础 CI：未受保护的 GitHub Actions 在精确 Go/PostgreSQL 基线上通过全部 18 个门禁。
-7. 下一阶段：保持 GitHub Free，先部署并验收 `B-01B` vanity 解析，绑定 `B-04`/`B-06` 身份与消费者基线，并准备 TMS、Parcel 合同入口；开放共享合并或创建首个 RC 前，再选择 GitHub Team 或满足同一保护合同的等价平台，建立 Ruleset、Environment、WORM 和发布身份。
+7. 已完成解析基础设施：部署并验收 `B-01B` 的公共 DNS、TLS、自动续期与 vanity metadata。
+8. 下一阶段：绑定 `B-04`/`B-06` 身份与消费者基线，准备 TMS、Parcel 合同入口和首个真实不可变 RC；开放共享合并或创建首个 RC 前，选择 GitHub Team 或满足同一保护合同的等价平台，建立 Ruleset、Environment、WORM 和发布身份。
 
 ## 下一步
 
-`v0.1` 实现基线、PostgreSQL 16.12 仓库验收、私有 Git 远端源码基线、基础 GitHub Actions CI 和 vanity 解析合同已经完成。下一推荐阶段是部署 `go.idp.xyz` 解析基础设施并绑定治理身份与消费者基线；受保护平台的付费或迁移选择推迟到开放共享合并或首个 RC 之前，不影响当前继续开发。
+`v0.1` 实现基线、PostgreSQL 16.12 仓库验收、私有 Git 远端源码基线、基础 GitHub Actions CI，以及 `go.idp.xyz` 的公共 DNS、TLS、自动续期和精确 vanity metadata 部署已经完成。下一推荐阶段是绑定治理身份与消费者基线，准备 TMS、Parcel 合同入口和首个真实不可变 RC；受保护平台的付费或迁移选择推迟到开放共享合并或首个 RC 之前，不影响当前继续开发。

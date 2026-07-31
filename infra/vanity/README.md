@@ -1,0 +1,57 @@
+# `go.idp.xyz` vanity 服务
+
+本目录实现 `docs/design/module-resolution-contract.md` 已确认的 HTTPS vanity metadata 合同。服务只公开 module prefix、VCS 类型和 Git 仓库地址，不保存或代理 GitHub 凭据。
+
+## 架构
+
+```text
+公共 DNS go.idp.xyz
+  -> 宿主 Nginx :80/:443（HTTP-01、TLS、HTTPS 重定向）
+  -> 127.0.0.1:8188
+  -> idp-bento-go-vanity 容器 :8080
+```
+
+容器使用固定 digest 的官方 Nginx 镜像，以 UID/GID `101:101` 运行，根文件系统只读，删除全部 Linux capabilities，只绑定宿主回环地址。页面对 module 根路径和任意包子路径返回同一个唯一 `go-import` 元数据。
+
+## 文件
+
+- `Dockerfile`、`nginx.conf`、`site/index.html`：不可变 vanity 镜像。
+- `compose.yaml`：回环端口、健康检查、资源限制和日志轮换。
+- `host/go.idp.xyz.http.conf`：首次签发证书时使用的 HTTP-only 配置。
+- `host/go.idp.xyz.conf`：最终 HTTPS 反向代理配置。
+- `host/install.sh`：备份现有同名站点、签发/复用证书、验证并 reload Nginx；任一步失败会尝试恢复原配置。
+- `verify.sh`：验证 module 根路径、真实公共包子路径、唯一 metadata 和 TLS SAN。
+
+## 部署
+
+目标主机必须已经运行 Docker、宿主 Nginx、certbot 和 `/var/www/certbot` HTTP-01 机制，且 `127.0.0.1:8188` 未被占用。
+
+```bash
+cd infra/vanity
+docker compose build --pull=false
+docker compose up -d
+docker compose ps
+curl --fail 'http://127.0.0.1:8188/idp-bento-go?go-get=1'
+sudo ./host/install.sh
+./verify.sh
+```
+
+主机已有 certbot 账户时不需要提供邮箱。若这是主机上的首个 ACME 账户，显式提供平台维护邮箱：
+
+```bash
+sudo env CERTBOT_EMAIL=ops@idp.xyz ./host/install.sh
+```
+
+certbot 的 `certbot.timer` 和现有 `/etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh` 负责自动续期与 Nginx reload。不要把 GitHub token、SSH 私钥或其他源码凭据放入本目录、镜像、Compose 环境变量或 Nginx 配置。
+
+## 回滚与撤销
+
+安装脚本在 `/var/backups/idp-bento-go-vanity/<UTC 时间>/` 保存它修改前的精确同名站点文件；失败时自动恢复。人工回滚必须只恢复该备份中的 `sites-available`/`sites-enabled`，随后执行 `nginx -t`，成功后才能 reload。
+
+停止容器不会删除证书或 Nginx 配置：
+
+```bash
+docker compose down
+```
+
+删除证书、备份或主机配置属于独立破坏性操作，不由本目录自动执行。

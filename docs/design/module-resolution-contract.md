@@ -1,12 +1,12 @@
 # `go.idp.xyz` module 解析合同
 
-状态：设计已确认；基础设施部署未验证
+状态：设计已确认；DNS、TLS 与 metadata 部署已验证；真实 RC 获取未验证
 
 日期：2026-07-31
 
 ## 主题与范围
 
-本文确认 `go.idp.xyz/idp-bento-go` 在 `v0.1` 的跨仓解析方式，并固定首次 RC 前必须通过的基础设施验收。本文不创建 DNS、TLS 证书、GitHub 凭据、CI 工作流、tag 或发布候选，也不改变正式 module path。
+本文确认 `go.idp.xyz/idp-bento-go` 在 `v0.1` 的跨仓解析方式，固定首次 RC 前必须通过的基础设施验收，并记录 2026-07-31 的实际 DNS、TLS 与 metadata 部署证据。本文不创建 GitHub 凭据、CI 工作流、tag 或发布候选，也不改变正式 module path。
 
 ## 已确认决定
 
@@ -72,6 +72,8 @@
 
 验收命令中的 RC 版本和凭据只能使用真实外部值。当前没有不可变 RC，因此本文不提供伪造的成功输出。
 
+截至 2026-07-31，第 1、2 项已经通过实际公网验收：Google 公共 DNS 返回 `go.idp.xyz A 8.133.22.7`；Let's Encrypt ECDSA 证书的 SAN 为 `go.idp.xyz`，有效期至 2026-10-29；module 根路径、`domain` 真实公共包子路径和额外的 `postgres/outbox` 子路径均返回 `200`，且只包含一个精确 metadata。第 3 至 6 项仍被“没有真实不可变 `v0.1.0-rc.N`、消费者身份和受保护证明作业”阻断，所以 `B-01B` 尚未整体升级为 `BOUND`。
+
 ## 失败关闭规则
 
 - DNS、TLS、元数据、Git 认证或 tag 任一失败：阻断 RC，不允许临时改用 GitHub import path。
@@ -90,4 +92,10 @@
 
 ## 当前状态
 
-解析方式、精确元数据和验收标准已经确认。2026-07-30 创建公司 Organization `idp-xyz` 并将仓库迁移到 `https://github.com/idp-xyz/idp-bento-go`；repository ID 保持 `1315735832`，owner ID 变为 `311024230`，旧 URL 自动重定向。远端仍无 tag。此前传播期间公共 DNS 曾返回 NXDOMAIN；最新 Google 公共 DNS-over-HTTPS 核验已返回 `go.idp.xyz A 8.133.22.7`，说明 DNS 记录已经出现，但对 80/443 的连接在 HTTP/TLS 握手阶段主动关闭，尚无有效 HTTPS 或 `go-import` 响应。TLS、线上元数据和空缓存真实 RC 下载仍无法执行。`B-01B` 继续阻断跨仓候选与发布，且不得把当前可移动的 `main` 提交当作候选基线。
+解析方式、精确元数据和验收标准已经确认。2026-07-30 创建公司 Organization `idp-xyz` 并将仓库迁移到私有仓库 `https://github.com/idp-xyz/idp-bento-go`；repository ID 保持 `1315735832`，owner ID 变为 `311024230`，旧 URL 自动重定向。远端仍无 tag。
+
+2026-07-31 已在 `8.133.22.7` 完成实际部署：宿主 Nginx 独占 80/443 和 TLS，反向代理到只绑定 `127.0.0.1:8188` 的 `idp-bento-go-vanity` 容器；容器以 `101:101` 非 root 身份运行，根文件系统只读、删除全部 capabilities 且不含 GitHub 凭据。运行镜像 ID 为 `sha256:1cd9d483d3a89dca40fc492211d94fadbc7f22cc49c8a6d467120d34ccb29a27`，基础镜像固定为官方 `nginx@sha256:7068961d45b07b2af510ac002e9daa63a1d3eba2111202d6768798690800fffd`。部署材料位于 `infra/vanity/`。
+
+Google 公共 DNS-over-HTTPS 返回 `go.idp.xyz A 8.133.22.7`；HTTP 请求 `301` 到同路径 HTTPS；Let's Encrypt ECDSA 证书 SAN 为 `go.idp.xyz`，有效期为 2026-07-31 至 2026-10-29。certbot `4.0.0` 使用现有账户和 `/var/www/certbot` webroot，`certbot.timer` 与现有 deploy hook 负责续期和 Nginx reload。module 根路径、`domain` 和 `postgres/outbox` 子路径已验证为 `200` 且唯一 metadata 精确匹配本合同。
+
+当前剩余阻断不再是 DNS、TLS 或 metadata 服务，而是真实不可变 RC、私有 Git 读取身份、空缓存下载、TMS/Parcel 消费证明和受保护证据作业。不得把当前可移动的 `main` 提交当作候选基线。
