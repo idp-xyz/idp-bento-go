@@ -81,6 +81,47 @@ _避免_：不推荐使用的近义词
 - 决策简报确认之后再开始框架实现。
 - `backup/` 是本地历史快照。核对事实、找范例、写链接时都从别处取。
 
+## 评审标准
+
+`flow-code-review` 的标准轴以这些文档为准，按相关性取用：
+
+- `AGENTS.md` 的「代码边界」一节——框架不导入产品包、公共 API 需要消费者用例和兼容性测试证明、核心包只依赖标准库。
+- `docs/design/package-boundaries.md`——包之间允许的依赖方向。
+- `docs/design/public-api-compatibility-contract.md`——公共 API 的兼容性分级与破坏性变更的判定。
+- `docs/design/` 下与改动区域对应的契约文档。
+- 改动区域覆盖到的 ADR。
+
+`gofmt`、`go vet` 和 CI 里的门禁已经把守的东西，评审时跳过。
+
+## 规格来源
+
+本仓库不用 issue tracker。规格轴按这个顺序找依据：
+
+1. 用户直接指定的决策简报或 ADR 路径。
+2. 本轮 `flow-grilling` 达成的共识（还在会话里）。
+3. `docs/design/` 下与改动主题对应的决策简报。
+4. 改动区域覆盖到的 ADR。
+
+都找不到时跳过规格轴，在报告里写明「无规格可依」。
+
+## 验证
+
+**最小相关**——改动落在哪个包就跑哪个：
+
+```
+go test -count=1 ./<包>/
+```
+
+**完整验证**——CI 跑的同一道门禁：
+
+```
+IDP_BENTO_POSTGRES_DSN=<dsn> go run ./internal/cmd/candidatecheck -initial-v0-1
+```
+
+它依次检查 Go 工具链版本（1.26.5）、module 身份、`go mod tidy -diff`、`gofmt -l -e`、公共 API 快照、Envelope 兼容性清单、生产依赖图，然后跑 `go vet ./...` 和 `go test -count=1 ./...`。
+
+候选测试连真实 PostgreSQL 跑，`IDP_BENTO_POSTGRES_DSN` 是必需的——缺了它门禁会直接失败而不是跳过。
+
 ## 测试
 
 见 [test-profile.md](test-profile.md)。
