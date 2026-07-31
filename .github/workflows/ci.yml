@@ -49,8 +49,11 @@ jobs:
           base='${{ github.event.pull_request.base.sha }}'
           if [ -z "$base" ]; then base="$(git rev-parse HEAD~1 2>/dev/null || echo '')"; fi
           if [ -z "$base" ]; then echo "no baseline commit; nothing to verify"; exit 0; fi
+          # --no-merges skips the throwaway merge commit GitHub synthesises for
+          # pull_request checks. It never reaches the default branch and cannot
+          # carry a signature.
           status=0
-          for commit in $(git rev-list "$base..HEAD"); do
+          for commit in $(git rev-list --no-merges "$base..HEAD"); do
             state="$(git log -1 --format='%G?' "$commit")"
             printf '%s %s\n' "$state" "$commit"
             case "$state" in G) ;; *) status=1 ;; esac
