@@ -137,7 +137,7 @@ Object Lock 模式、三年保留、对象前缀、OIDC subject、ECDSA P-256 �
 - 迁移前个人 owner ID 为 `310467973`；GitHub 不支持把个人账号转换为 Organization，因此创建 `idp-xyz` 后转移仓库。旧 URL 已验证自动重定向到新地址。
 - 基础 CI 修复推送后，远端 `main` 指向 `c780c14212aa9ebd367fb9b0379e7d9562360f5a`；该观测值可变，不是 `B-06` 基线或发布授权。
 - `Framework CI` run `30563832922` 已成功，证明基础 workflow 能在固定 PostgreSQL 16.12 环境运行仓内 18 门禁。Environment、tag 与发布控制面仍未部署。
-- Ruleset 页面明确提示 GitHub Free 不执行私有仓库规则。用户已确认保持 Free、不购买 Team；因此默认分支仍未受保护，Team 或等价受保护平台只在开放共享合并或首个 RC 前成为强制选择。
+- 仓库已于 2026-07-31 转为公开，保持 GitHub Free。GitHub Free 对公开仓库执行 Ruleset，付费平台因此不再是受保护分支与不可变 tag 的前提。`protected-main` 与 `immutable-release-tags` 已部署为 `active` 并实测拦截。剩余的 `workflow_dispatch`、职责分离 GitHub App、Environment、WORM/OIDC/KMS/DSSE 与提交签名仍未部署。
 
 ## 剩余外部绑定
 

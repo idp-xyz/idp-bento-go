@@ -13,7 +13,7 @@
 - 已建立八个公共包的无本机绝对路径 `.apidiff` 快照、两个编译夹具，以及 132-case 的 Envelope v1 行为清单。
 - 仓库内 `I-04` 矩阵已在 PostgreSQL 16.12 上通过；2026-07-31，基础 GitHub Actions `Framework CI` 又在 PostgreSQL 16.12 上通过 `candidatecheck -initial-v0-1` 的全部 18 个门禁（run `30563832922`）。该 workflow 未受 Ruleset 保护，只是开发反馈，不是 RC 或稳定发布授权。
 - 私有远端仓库已经接收完整源码；`go.idp.xyz` 解析基础设施、不可变候选 `v0.1.0-rc.1` 及其空缓存真实获取、TMS 与 Parcel 对同一候选的合同执行均已验收。
-- 当前明确保持 GitHub Free，不购买 Team；免费 Organization 不执行私有仓库 Ruleset，因此受保护默认分支、维护者身份、受保护 RC 和两侧正式合同证明尚未完成，当前仍不是稳定版本发布完成。Team 或等价受保护平台只需在开放共享合并或首个受保护 RC 前选择。
+- 仓库已转为公开，保持 GitHub Free。公开仓库不受私有仓库 Ruleset 限制，受保护默认分支与不可变发布 tag 已部署并实测拦截强推、删除和 tag 移动。维护者身份、受保护候选 workflow、WORM 证据与两侧正式合同证明仍未完成，当前仍不是稳定版本发布完成。
 
 ## 已确认基线
 
