@@ -36,6 +36,10 @@ type Proof struct {
 	ContractSuiteVersion string `json:"contract_suite_version"`
 	Result               string `json:"result"`
 	CompletedAt          string `json:"completed_at"`
+
+	// AcknowledgedGovernanceMode 是消费者对框架治理模式的确认，不是声明。
+	// 权威值在发布证据 manifest 的 framework 块，由 evidencecheck 比对。
+	AcknowledgedGovernanceMode string `json:"acknowledged_governance_mode"`
 }
 
 // Expectation 固定协调作业正在核验的不可变候选与消费者基线身份。
@@ -45,6 +49,15 @@ type Expectation struct {
 	ContractSuiteVersion string
 	TMSConsumerCommit    string
 	ParcelConsumerCommit string
+}
+
+// GovernanceMode 报告两个消费者一致确认的治理模式。只有 ValidatePair 通过后
+// 该值才有意义，调用方据此与发布证据 manifest 的权威值比对。
+func GovernanceMode(tms, parcel Proof) string {
+	if tms.AcknowledgedGovernanceMode != parcel.AcknowledgedGovernanceMode {
+		return ""
+	}
+	return tms.AcknowledgedGovernanceMode
 }
 
 // Read 从严格 JSON 文件读取一份证明，拒绝未知字段和尾随内容。
@@ -137,6 +150,9 @@ func validateProof(proof Proof, consumer, expectedCommit string, expected Expect
 	if _, err := time.Parse(time.RFC3339Nano, proof.CompletedAt); err != nil {
 		return fmt.Errorf("completed_at must be RFC3339Nano: %w", err)
 	}
+	if !validGovernanceMode(proof.AcknowledgedGovernanceMode) {
+		return errors.New("acknowledged_governance_mode must be an uppercase printable ASCII token of at most 64 bytes")
+	}
 	return nil
 }
 
@@ -146,6 +162,24 @@ func validModuleChecksum(value string) bool {
 	}
 	digest, err := base64.StdEncoding.DecodeString(strings.TrimPrefix(value, "h1:"))
 	return err == nil && len(digest) == 32
+}
+
+// validGovernanceMode 比 validToken 更严：大写、上限 64 字节。该值随发布证据
+// 写入 WORM 后不可撤回，所以取值面在这里收窄，避免大小写变体产生两个含义相同
+// 却比对失败的取值。
+func validGovernanceMode(value string) bool {
+	if value == "" || len(value) > 64 {
+		return false
+	}
+	for _, character := range value {
+		if character < 0x21 || character > 0x7e {
+			return false
+		}
+		if character >= 'a' && character <= 'z' {
+			return false
+		}
+	}
+	return true
 }
 
 func validToken(value string) bool {

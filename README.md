@@ -93,7 +93,7 @@
 - [包边界](./docs/design/package-boundaries.md)
 - [消费者合同策略](./docs/design/consumer-contracts.md)
 - [维护与发布治理](./docs/design/maintenance-governance.md)
-- [单维护者治理模式与证据披露决策简报（`Draft`）](./docs/design/solo-maintainer-governance-decision-brief.md)
+- [单维护者治理模式与证据披露决策简报](./docs/design/solo-maintainer-governance-decision-brief.md)
 - [版本兼容性与支持策略](./docs/design/version-support-policy.md)
 - [可观测性边界](./docs/design/observability.md)
 - [实施就绪审计](./docs/design/implementation-readiness-audit.md)

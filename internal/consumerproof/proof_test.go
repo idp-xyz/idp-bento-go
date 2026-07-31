@@ -39,6 +39,12 @@ func TestValidatePairRejectsInvalidEvidence(t *testing.T) {
 		{name: "failed contract", mutate: func(_ *Proof, parcel *Proof, _ *Expectation) { parcel.Result = ResultFail }, wantErr: "result is FAIL"},
 		{name: "unknown result", mutate: func(_ *Proof, parcel *Proof, _ *Expectation) { parcel.Result = "SKIPPED" }, wantErr: "unsupported result"},
 		{name: "invalid completion time", mutate: func(_ *Proof, parcel *Proof, _ *Expectation) { parcel.CompletedAt = "yesterday" }, wantErr: "RFC3339Nano"},
+		{name: "missing governance mode", mutate: func(_ *Proof, parcel *Proof, _ *Expectation) { parcel.AcknowledgedGovernanceMode = "" }, wantErr: "acknowledged_governance_mode"},
+		{name: "lowercase governance mode", mutate: func(_ *Proof, parcel *Proof, _ *Expectation) { parcel.AcknowledgedGovernanceMode = "solo_bootstrap" }, wantErr: "acknowledged_governance_mode"},
+		{name: "governance mode with whitespace", mutate: func(_ *Proof, parcel *Proof, _ *Expectation) { parcel.AcknowledgedGovernanceMode = "SOLO BOOTSTRAP" }, wantErr: "acknowledged_governance_mode"},
+		{name: "overlong governance mode", mutate: func(_ *Proof, parcel *Proof, _ *Expectation) {
+			parcel.AcknowledgedGovernanceMode = strings.Repeat("A", 65)
+		}, wantErr: "acknowledged_governance_mode"},
 	}
 	for _, test := range tests {
 		test := test
@@ -94,6 +100,22 @@ func TestReadAcceptsCanonicalProof(t *testing.T) {
 	}
 }
 
+func TestGovernanceModeRequiresBothConsumersToAgree(t *testing.T) {
+	t.Parallel()
+	expected := validExpectation()
+	tms := validProof(ConsumerTMS, expected)
+	parcel := validProof(ConsumerParcel, expected)
+
+	if got := GovernanceMode(tms, parcel); got != tms.AcknowledgedGovernanceMode {
+		t.Fatalf("GovernanceMode = %q, want %q", got, tms.AcknowledgedGovernanceMode)
+	}
+
+	parcel.AcknowledgedGovernanceMode = "DUAL_MAINTAINER"
+	if got := GovernanceMode(tms, parcel); got != "" {
+		t.Fatalf("GovernanceMode = %q for disagreeing consumers, want empty", got)
+	}
+}
+
 func validExpectation() Expectation {
 	return Expectation{
 		CandidateVersion:     "v0.1.0-rc.1",
@@ -119,6 +141,8 @@ func validProof(consumer string, expected Expectation) Proof {
 		ContractSuiteVersion: expected.ContractSuiteVersion,
 		Result:               ResultPass,
 		CompletedAt:          "2026-07-30T08:00:00.123456789Z",
+
+		AcknowledgedGovernanceMode: "SOLO_BOOTSTRAP",
 	}
 }
 

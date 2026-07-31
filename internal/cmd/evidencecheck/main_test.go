@@ -90,6 +90,8 @@ func commandManifest(frameworkCommit, checksum, tmsCommit, parcelCommit string, 
 			Result:                     releaseevidence.ResultPass,
 			CandidatecheckOutputSHA256: commandSHA("5"),
 			CompletedAt:                "2026-07-30T07:59:00Z",
+
+			GovernanceMode: "SOLO_BOOTSTRAP",
 		},
 		TMS:    commandConsumerRun(200, "idp-repo/idp-tms", tmsCommit, "6", 201, 202, 203, tmsBytes, "2026-07-30T08:01:00Z", "2026-07-30T08:10:00Z"),
 		Parcel: commandConsumerRun(300, "idp-repo/idp-parcel", parcelCommit, "7", 301, 302, 303, parcelBytes, "2026-07-30T08:02:00Z", "2026-07-30T08:11:00Z"),
@@ -128,6 +130,8 @@ func commandEvidenceProof(consumer, commit, checksum, completedAt string) consum
 		ContractSuiteVersion: "r05-v1",
 		Result:               consumerproof.ResultPass,
 		CompletedAt:          completedAt,
+
+		AcknowledgedGovernanceMode: "SOLO_BOOTSTRAP",
 	}
 }
 

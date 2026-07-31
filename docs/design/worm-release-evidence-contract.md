@@ -95,7 +95,7 @@ OIDC provider 不支持 repository ID 或 workflow 限制时，必须增加受�
 | `candidate` | 候选版本、框架提交、正式 module path/checksum、Git origin 和 API 比较身份 |
 | `contract_suite_version` | 与两个证明及协调输入完全一致 |
 | `requested_at` / `deadline_at` | RFC3339Nano；窗口大于 0 且不超过 40 分钟 |
-| `framework` | 框架 repository/workflow/run、精确工具/镜像、`candidatecheck` 结果与输出摘要 |
+| `framework` | 框架 repository/workflow/run、精确工具/镜像、`candidatecheck` 结果与输出摘要、权威 `governance_mode` |
 | `tms` / `parcel` | 消费者 repository/workflow/run/actor、预期提交、Artifact/证明摘要和开始完成时间 |
 | `created_at` | 不早于两个消费者完成时间且不晚于协调 deadline |
 
@@ -105,6 +105,8 @@ OIDC provider 不支持 repository ID 或 workflow 限制时，必须增加受�
 - `mode=immutable` 要求合法前序版本、前序 API 制品 SHA-256 和候选 API 制品 SHA-256。
 
 `framework` 必须记录正整数 repository/workflow/run ID 与 run attempt、workflow 完整提交/ref、runner image、精确 Go patch、带 `@sha256:` digest 的 PostgreSQL image、`PASS`、`candidatecheck` 输出 SHA-256 和完成时间。
+
+`framework.governance_mode` 是治理模式的权威声明，1 至 64 字节、无空白的可打印 ASCII 大写标识。`SOLO_BOOTSTRAP` 表示单维护者、无独立人工审批，见[维护与发布治理](./maintenance-governance.md)的「当前治理模式」。`evidencecheck` 校验两份消费者证明的 `acknowledged_governance_mode` 彼此相等且等于本字段——单点声明加双侧确认，任何一侧默默不承认都会失败。写入 WORM 后该值不可撤回，所以取值语义在设计阶段固定，不留到实现决定。
 
 每个消费者来源必须记录不同的 repository ID/owner/name、`B-06` 预期提交、workflow ID/完整 SHA/ref、run ID/attempt、actor ID、`workflow_dispatch`、`success`、Artifact ID/digest、原始证明文件 SHA-256 和 run 时间。证明自身的 `completed_at` 必须落在对应 run 内。
 

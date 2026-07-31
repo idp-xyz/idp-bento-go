@@ -68,7 +68,7 @@ go run ./internal/cmd/candidatecheck -baseline D:\artifacts\idp-bento-go\<前序
 
 `B-05` 已确认使用 GitHub Actions。基础 `.github/workflows/ci.yml` 已创建并通过，但未受 Ruleset 保护。后续受保护候选 workflow 至少保存候选版本、框架提交、精确 Go/PostgreSQL 版本、module checksum、完整 `candidatecheck` 输出、不可变旧基线身份、TMS/Parcel 预期与实际提交、合同套件版本、结果和完成时间。
 
-框架 repository ID、Organization owner ID、基础 workflow 和成功 run `30563832922` 已完成核验；消费者 repository ID、候选/发布 workflow、App、证明存储 URI、签名/provenance 实现仍属于 `B-05` 的真实外部绑定，详见[GitHub Actions 候选与发布合同](./github-actions-release-contract.md)。批准人由受保护平台记录，不写入可随代码修改的 JSON 充当授权证明。
+框架 repository ID、Organization owner ID、基础 workflow 和成功 run `30563832922` 已完成核验；消费者 repository ID、候选/发布 workflow、App、证明存储 URI、签名/provenance 实现仍属于 `B-05` 的真实外部绑定，详见[GitHub Actions 候选与发布合同](./github-actions-release-contract.md)。批准人由受保护平台记录，不写入可随代码修改的 JSON 充当授权证明。当前 `SOLO_BOOTSTRAP` 模式下没有独立批准人，`governance_mode` 在 manifest 与两份消费者证明中公布这一事实。
 
 不可变 RC 创建并由两个消费者执行合同后，协调作业先按[双消费者候选合同证明格式](./consumer-proof-format.md)运行 `proofcheck`，再按[WORM 发布证据与签名合同](./worm-release-evidence-contract.md)运行 `evidencecheck`、写入三年 Compliance Lock 对象并验证 DSSE 回执。两个命令都必须提供 `B-06` 的 TMS/Parcel 预期提交；全部步骤位于稳定 tag 之前。
 

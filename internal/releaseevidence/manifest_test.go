@@ -62,6 +62,57 @@ func TestValidateBundleFailsClosed(t *testing.T) {
 	}
 }
 
+func TestValidateBundleRequiresAgreedGovernanceMode(t *testing.T) {
+	t.Parallel()
+	tests := []struct {
+		name    string
+		mutate  func(*Manifest, *consumerproof.Proof, *consumerproof.Proof)
+		wantErr string
+	}{
+		{
+			name: "consumers disagree",
+			mutate: func(_ *Manifest, _ *consumerproof.Proof, parcel *consumerproof.Proof) {
+				parcel.AcknowledgedGovernanceMode = "DUAL_MAINTAINER"
+			},
+			wantErr: "both consumers must acknowledge the same mode",
+		},
+		{
+			name: "consumers agree but contradict the framework",
+			mutate: func(_ *Manifest, tms *consumerproof.Proof, parcel *consumerproof.Proof) {
+				tms.AcknowledgedGovernanceMode = "DUAL_MAINTAINER"
+				parcel.AcknowledgedGovernanceMode = "DUAL_MAINTAINER"
+			},
+			wantErr: "the framework declares",
+		},
+		{
+			name: "framework declares a lowercase mode",
+			mutate: func(manifest *Manifest, _ *consumerproof.Proof, _ *consumerproof.Proof) {
+				manifest.Framework.GovernanceMode = "solo_bootstrap"
+			},
+			wantErr: "governance_mode",
+		},
+		{
+			name: "framework omits the mode",
+			mutate: func(manifest *Manifest, _ *consumerproof.Proof, _ *consumerproof.Proof) {
+				manifest.Framework.GovernanceMode = ""
+			},
+			wantErr: "governance_mode",
+		},
+	}
+	for _, test := range tests {
+		test := test
+		t.Run(test.name, func(t *testing.T) {
+			t.Parallel()
+			manifest, tmsProof, parcelProof, tmsBytes, parcelBytes, expected := validBundle(t)
+			test.mutate(&manifest, &tmsProof, &parcelProof)
+			err := ValidateBundle(manifest, tmsProof, parcelProof, tmsBytes, parcelBytes, expected)
+			if err == nil || !strings.Contains(err.Error(), test.wantErr) {
+				t.Fatalf("error = %v, want substring %q", err, test.wantErr)
+			}
+		})
+	}
+}
+
 func TestReadRejectsUnknownFieldsAndTrailingJSON(t *testing.T) {
 	t.Parallel()
 	for name, content := range map[string]string{
@@ -144,6 +195,8 @@ func validBundle(t *testing.T) (Manifest, consumerproof.Proof, consumerproof.Pro
 			Result:                     ResultPass,
 			CandidatecheckOutputSHA256: evidenceSHA("5"),
 			CompletedAt:                "2026-07-30T07:59:00Z",
+
+			GovernanceMode: "SOLO_BOOTSTRAP",
 		},
 		TMS:    evidenceConsumerRun(200, "idp-repo/idp-tms", expected.TMSConsumerCommit, "6", 201, 202, 203, tmsBytes, "2026-07-30T08:01:00Z", "2026-07-30T08:10:00Z"),
 		Parcel: evidenceConsumerRun(300, "idp-repo/idp-parcel", expected.ParcelConsumerCommit, "7", 301, 302, 303, parcelBytes, "2026-07-30T08:02:00Z", "2026-07-30T08:11:00Z"),
@@ -183,6 +236,8 @@ func evidenceProof(consumer, commit string, expected Expectation, completedAt st
 		ContractSuiteVersion: expected.ContractSuiteVersion,
 		Result:               consumerproof.ResultPass,
 		CompletedAt:          completedAt,
+
+		AcknowledgedGovernanceMode: "SOLO_BOOTSTRAP",
 	}
 }
 

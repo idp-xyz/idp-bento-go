@@ -80,6 +80,10 @@ type FrameworkRun struct {
 	Result                     string `json:"result"`
 	CandidatecheckOutputSHA256 string `json:"candidatecheck_output_sha256"`
 	CompletedAt                string `json:"completed_at"`
+
+	// GovernanceMode 是治理模式的权威声明。两份消费者证明记录的是对它的确认，
+	// ValidateBundle 比对三者一致。
+	GovernanceMode string `json:"governance_mode"`
 }
 
 type ConsumerRun struct {
@@ -190,6 +194,15 @@ func ValidateBundle(manifest Manifest, tmsProof, parcelProof consumerproof.Proof
 	if manifest.Framework.RepositoryID == manifest.TMS.RepositoryID || manifest.Framework.RepositoryID == manifest.Parcel.RepositoryID {
 		return errors.New("framework and consumer repository IDs must be different")
 	}
+	acknowledged := consumerproof.GovernanceMode(tmsProof, parcelProof)
+	if acknowledged == "" {
+		return fmt.Errorf("TMS acknowledged governance mode %q but Parcel acknowledged %q; both consumers must acknowledge the same mode",
+			tmsProof.AcknowledgedGovernanceMode, parcelProof.AcknowledgedGovernanceMode)
+	}
+	if acknowledged != manifest.Framework.GovernanceMode {
+		return fmt.Errorf("consumers acknowledged governance mode %q but the framework declares %q",
+			acknowledged, manifest.Framework.GovernanceMode)
+	}
 	createdAt, err := parseTime("created_at", manifest.CreatedAt)
 	if err != nil {
 		return err
@@ -261,6 +274,9 @@ func validateFramework(run FrameworkRun) (time.Time, error) {
 	if !sha256DigestPattern.MatchString(run.CandidatecheckOutputSHA256) {
 		return time.Time{}, errors.New("candidatecheck_output_sha256 must be a SHA-256 digest")
 	}
+	if !validGovernanceMode(run.GovernanceMode) {
+		return time.Time{}, errors.New("governance_mode must be an uppercase printable ASCII token of at most 64 bytes")
+	}
 	return parseTime("completed_at", run.CompletedAt)
 }
 
@@ -316,6 +332,23 @@ func parseTime(field, value string) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("%s must be RFC3339Nano: %w", field, err)
 	}
 	return parsed, nil
+}
+
+// validGovernanceMode 要求大写可打印 ASCII，上限 64 字节，与 consumerproof
+// 保持同一取值面，否则三方比对会因大小写变体而失败。
+func validGovernanceMode(value string) bool {
+	if value == "" || len(value) > 64 {
+		return false
+	}
+	for _, character := range value {
+		if character < 0x21 || character > 0x7e {
+			return false
+		}
+		if character >= 'a' && character <= 'z' {
+			return false
+		}
+	}
+	return true
 }
 
 func validToken(value string, maxLength int) bool {

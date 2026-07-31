@@ -84,6 +84,8 @@ func commandProof(consumer, commitDigit, checksum string) consumerproof.Proof {
 		ContractSuiteVersion: "r05-v1",
 		Result:               consumerproof.ResultPass,
 		CompletedAt:          "2026-07-30T08:00:00Z",
+
+		AcknowledgedGovernanceMode: "SOLO_BOOTSTRAP",
 	}
 }
 

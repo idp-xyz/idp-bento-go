@@ -86,7 +86,7 @@ Audit date: 2026-07-31
 | `B-01B` | 实际 Git 地址及 `go.idp.xyz` 的 vanity metadata 或私有 GOPROXY 路由 | 首次跨仓获取候选前 | `RESOLUTION AND RC DOWNLOAD VERIFIED / CONSUMER PROOF PENDING`：Git 仓库为 `https://github.com/idp-xyz/idp-bento-go`；Google 公共 DNS 返回 `go.idp.xyz A 8.133.22.7`；Let's Encrypt ECDSA TLS、自动续期、module 根路径和真实公共包子路径的唯一精确 metadata 已通过公网验收；`v0.1.0-rc.1` 在空 `GOMODCACHE`/`GOCACHE`、`GOPRIVATE=go.idp.xyz`、`GOPROXY=direct`、`GIT_TERMINAL_PROMPT=0` 下两次独立返回同一 `Sum` `h1:lx/snQkwUQW5pWPOgNI4AsZrSxxi0YYqHfOemsgEuLQ=` 与 Git origin。TMS 与 Parcel 的合同均已在真实 PostgreSQL 16 上执行通过。剩余两侧正式证明文件和受保护证据作业未完成，`B-01B` 尚未整体 `BOUND` |
 | `B-02` | 精确 Go、`pgx/v5`、OpenTelemetry、apidiff 与 SemVer 解析版本 | 创建代码基线与依赖锁时 | `BOUND`：Go `1.26.5`、pgx `v5.10.0`、OpenTelemetry API `v1.44.0`、`x/exp v0.0.0-20260727155853-b88d891fe743`、`x/mod v0.38.0`；2026-07-29 由官方端点核验，`x/mod` 原已由工具链间接锁定，现由证明校验直接使用 |
 | `B-03` | PostgreSQL 验证主版本范围 | 首个适配器集成测试前 | `BOUND`：`v0.1` 初始支持 major 16；CI 使用最新稳定 16.x，当前证据为 16.12 |
-| `B-04` | 维护者、消费者代表、安全批准者账号 | 开放共享合并与发布候选前 | `UNBOUND IDENTITIES`：公司 Organization `idp-xyz` 已绑定，但真实维护者、消费者代表和安全批准者账号尚未绑定 |
+| `B-04` | 维护者、消费者代表、安全批准者账号 | 开放共享合并与发布候选前 | `SOLO_BOOTSTRAP`：公司 Organization `idp-xyz` 已绑定；实际维护者为一人，不存在第二个独立账号，消费者代表和安全批准者未绑定。这不是等待绑定即可解除的状态——目标形态需要真实增加人员，在此之前 `governance_mode` 随每次发布证据公布无独立人工审批 |
 | `B-05` | CI 平台、跨仓触发与合同证明存储 | 首个跨仓发布候选前 | `BASIC CI DEPLOYED / RELEASE DEPLOYMENT UNVERIFIED`：基础 `.github/workflows/ci.yml` 已固定 Action SHA、Go 1.26.5 与 PostgreSQL 16.12 digest，并在提交 `c780c14212aa9ebd367fb9b0379e7d9562360f5a` 的 run `30563832922` 通过；当前明确保持 GitHub Free，私有仓库 Ruleset 不执行，所以该 run 不是受保护发布证据。`workflow_dispatch`、职责分离 GitHub App、WORM/OIDC/KMS/DSSE、Environment、消费者协调和演练仍未部署；Team 或等价受保护平台只在共享合并或首个 RC 前强制选择 |
 | `B-06` | 首发日期、支持矩阵日期和消费者基线提交 | 首个稳定版本前 | `UNBOUND` |
 

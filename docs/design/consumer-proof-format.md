@@ -25,6 +25,7 @@
 | `contract_suite_version` | 1 至 128 字节、无空白的可打印 ASCII 标识；必须与协调命令期望值完全一致。两个消费者必须报同一个值，不得使用各自的本地套件名，否则 `proofcheck` 对其中一方必然失败。`v0.1` 使用 `r05-v1` |
 | `result` | `proofcheck` 只接受 `PASS`；`FAIL`、未知值、缺失证明和跳过都阻断稳定 tag |
 | `completed_at` | 可由 `time.RFC3339Nano` 解析的完成时间 |
+| `acknowledged_governance_mode` | 消费者确认自己知晓框架当前的治理模式。1 至 64 字节、无空白的可打印 ASCII 大写标识；必须与 manifest `framework.governance_mode` 完全一致。两个消费者必须报同一个值——由消费者自报框架治理模式在语义上是错的，所以这里记的是**确认**而非声明，权威值在 manifest |
 
 以下只是格式示例，不是实际候选证明：
 
@@ -38,7 +39,8 @@
   "module_checksum": "h1:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
   "contract_suite_version": "r05-v1",
   "result": "PASS",
-  "completed_at": "2026-07-30T08:00:00Z"
+  "completed_at": "2026-07-30T08:00:00Z",
+  "acknowledged_governance_mode": "SOLO_BOOTSTRAP"
 }
 ```
 
@@ -76,7 +78,7 @@ go run ./internal/cmd/proofcheck `
 - 两个文件来自受信任的 TMS/Parcel 工作流，而不是本地伪造。
 - 工作流针对同一不可变 RC 和 module checksum，且在规定超时内完成。
 - 证明、候选日志和 `candidatecheck` 输出存入不可变审计位置。
-- `B-04` 要求的维护者、双消费者代表和适用安全批准已经满足。
+- `B-04` 要求的维护者、双消费者代表和适用安全批准已经满足；或当前 `governance_mode` 已在 manifest 与两份证明中一致公布，且发布者接受该模式缺少独立人工审批。
 - 稳定 tag 由短期最小权限 CI 身份创建并受 Ruleset 防移动，DSSE 发布授权签名绑定版本、目标提交和候选证据；个人不能直接发布。
 
 这些平台事实不能由仓库中的可编辑 JSON 自证。GitHub Actions 的精确来源与权限见[GitHub Actions 候选与发布合同](./github-actions-release-contract.md)，Object Lock、OIDC、manifest 与 DSSE 见[WORM 发布证据与签名合同](./worm-release-evidence-contract.md)；在 `B-04`、`B-05` 完全绑定前，示例或本地生成文件都不能解除发布门禁。
