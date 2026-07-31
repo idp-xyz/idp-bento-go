@@ -1,6 +1,6 @@
 # 双消费者候选合同证明格式
 
-状态：仓内格式与校验器已实现；GitHub Actions/WORM/OIDC/DSSE 配置已确认，外部身份与部署未绑定
+状态：仓内格式与校验器已实现，两侧已产出真实证明并通过协调校验；GitHub Actions/WORM/OIDC/DSSE 配置已确认，外部身份与部署未绑定
 
 日期：2026-07-30
 
@@ -22,7 +22,7 @@
 | `candidate_version` | 必须与协调命令给出的合法预发布 SemVer 完全一致，例如 `v0.1.0-rc.1` |
 | `module_path` | 必须为 `go.idp.xyz/idp-bento-go` |
 | `module_checksum` | 必须与协调命令给出的 Go module `h1:` SHA-256 checksum 完全一致 |
-| `contract_suite_version` | 1 至 128 字节、无空白的可打印 ASCII 标识；必须与协调命令期望值完全一致 |
+| `contract_suite_version` | 1 至 128 字节、无空白的可打印 ASCII 标识；必须与协调命令期望值完全一致。两个消费者必须报同一个值，不得使用各自的本地套件名，否则 `proofcheck` 对其中一方必然失败。`v0.1` 使用 `r05-v1` |
 | `result` | `proofcheck` 只接受 `PASS`；`FAIL`、未知值、缺失证明和跳过都阻断稳定 tag |
 | `completed_at` | 可由 `time.RFC3339Nano` 解析的完成时间 |
 
@@ -83,4 +83,12 @@ go run ./internal/cmd/proofcheck `
 
 ## 当前状态
 
-严格读取、checksum/SemVer/Git object ID、预期 TMS/Parcel 提交、双消费者同候选比较、失败结果、候选/合同错配、未知字段和尾随 JSON 负向测试已经实现。真实不可变候选 `v0.1.0-rc.1` 已经存在，TMS 在提交 `f8eb9c3`（集成门禁补齐于 `7661603`）、Parcel 在提交 `960a516` 都已从正式 module path 锁定同一 checksum，两侧合同作业均已在真实 PostgreSQL 16 上完整执行通过。两侧尚未按本文格式产出正式证明文件，因此 `proofcheck` 尚未产生任何发布结论。
+严格读取、checksum/SemVer/Git object ID、预期 TMS/Parcel 提交、双消费者同候选比较、失败结果、候选/合同错配、未知字段和尾随 JSON 负向测试已经实现。两侧已按本文格式产出真实证明文件。TMS 在提交 `1942bb1`、Parcel 在提交 `9c73c42` 增加了证明产出器：证明只在全部合同用例通过后写出，缺 PostgreSQL DSN 或工作树不干净时拒绝生成，因此文件不可能声称该次运行没有产生的结果。2026-07-31 对 `v0.1.0-rc.2` 运行两侧合同并产出证明后，协调校验返回：
+
+```
+proofcheck: TMS 1942bb13d24e752f172fc7a84c7a395aec0742a4 and Parcel 9c73c421a513ca51750af816c2972b7ad5dc1527 passed v0.1.0-rc.2 h1:W9T1KsbXwuVs3lHTNwSUcEBY0Ids00hUH7I9KuBtCEo= with suite r05-v1
+```
+
+同一对文件在 `-checksum` 改为 `v0.1.0-rc.1` 的值时按预期失败并报 `module_checksum does not match the expected candidate`，确认校验不是恒真。
+
+该结果不是发布授权。证明由本地运行产生，不满足本文第 76 至 80 行要求的受信任工作流来源、不可变审计存储、`B-04` 批准和 DSSE 发布授权；在 `B-04`、`B-05` 完全绑定前，它只证明格式与内容层可以走通，不解除任何发布门禁。证明文件也不进入本仓库——权威副本必须写入 WORM 存储，仓内可编辑文件不得充当证据。

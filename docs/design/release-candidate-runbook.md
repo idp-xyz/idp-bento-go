@@ -88,7 +88,8 @@ go run ./internal/cmd/candidatecheck -baseline D:\artifacts\idp-bento-go\<前序
 | TMS 消费者合同（`tests/bentocontract`） | 提交 `f8eb9c3` 建立 `TBC-01` 至 `TBC-05`，`7661603` 补齐 `TBC-06` 至 `TBC-08`，`37d3209` 改锁 rc.2；八个用例在 PostgreSQL 16.14 上以 `-count=1` 全部通过 |
 | Parcel 消费者合同（`tests/bentocontract`） | 提交 `960a516` 建立合同，`1ce7c01` 改锁 rc.2；`PBC-01`、`PBC-05`、`PBC-06`、`PBC-08` 在 PostgreSQL 16.14 上以 `-count=1` 全部通过 |
 | 受保护候选 workflow、App、证明存储与 provenance（`B-05`） | 未绑定 |
-| `proofcheck` / `evidencecheck`、WORM Compliance Lock 与 DSSE 回执 | 未执行 |
+| 两侧正式证明文件与 `proofcheck` | 已在 rc.2 上通过，TMS 提交 `1942bb1`、Parcel 提交 `9c73c42`；证明来自本地运行，不满足受信任工作流来源要求 |
+| `evidencecheck`、WORM Compliance Lock 与 DSSE 回执 | 未执行 |
 | 24 小时冷静期与新 CI run 复验 | 未开始 |
 
 因此当前有两个不可变候选，没有稳定版本。`v0.1.0-rc.1` 与 `v0.1.0-rc.2` 都不得被描述为已发布 `v0.x`，其消费者合同结果也不得替代受保护 CI 证明。后续候选必须继续使用 `-baseline`，不得再使用 `-initial-v0-1`。
