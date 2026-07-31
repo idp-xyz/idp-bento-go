@@ -20,6 +20,7 @@
 - `host/go.idp.xyz.http.conf`：首次签发证书时使用的 HTTP-only 配置。
 - `host/go.idp.xyz.conf`：最终 HTTPS 反向代理配置。
 - `host/install.sh`：备份现有同名站点、签发/复用证书、验证并 reload Nginx；任一步失败会尝试恢复原配置。
+- `host/harden.sh`：部署验收后把运行材料移交 root，撤销临时 SSH 公钥和 Docker 组权限，并锁定临时部署账号。
 - `verify.sh`：验证 module 根路径、真实公共包子路径、唯一 metadata 和 TLS SAN。
 
 ## 部署
@@ -43,6 +44,23 @@ sudo env CERTBOT_EMAIL=ops@idp.xyz ./host/install.sh
 ```
 
 certbot 的 `certbot.timer` 和现有 `/etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh` 负责自动续期与 Nginx reload。不要把 GitHub token、SSH 私钥或其他源码凭据放入本目录、镜像、Compose 环境变量或 Nginx 配置。
+
+## 生产权限收口
+
+公网验收和 CI 通过后，从部署目录之外以 root 执行：
+
+```bash
+bash /home/idp-vanity/services/go.idp.xyz/host/harden.sh
+```
+
+脚本先验证当前容器和 metadata，再执行以下受限变更：
+
+- 将部署目录移动到 root 拥有的 `/opt/idp-bento-go-vanity`；Compose 项目名固定为 `goidpxyz`，不会因此创建第二套容器。
+- 将原 `authorized_keys` 备份到 `/var/backups/idp-bento-go-vanity/hardening-<UTC 时间>/`，只删除本次任务创建的三把临时公钥。
+- 从 `idp-vanity` 移除 `docker` 组，锁定密码并把 shell 改为 `/usr/sbin/nologin`。
+- 重新解析 Compose、显示现有容器并执行一次公网 metadata 检查。
+
+收口后所有更新必须通过明确授权的 root/发布运维流程从 `/opt/idp-bento-go-vanity` 执行，不得重新授予常驻 Docker 组或复用临时密钥。
 
 ## 回滚与撤销
 

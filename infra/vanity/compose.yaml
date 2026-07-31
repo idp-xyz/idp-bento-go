@@ -1,3 +1,5 @@
+name: goidpxyz
+
 services:
   vanity:
     image: idp-bento-go-vanity:0.1.0
