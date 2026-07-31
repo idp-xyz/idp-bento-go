@@ -84,13 +84,13 @@ go run ./internal/cmd/candidatecheck -baseline D:\artifacts\idp-bento-go\<前序
 | --- | --- |
 | `v0.1.0-rc.1` tag 与空缓存下载证明 | 已完成，见[module 解析与 vanity 合同](./module-resolution-contract.md) |
 | `v0.1.0-rc.2` tag 与空缓存下载证明 | 已完成，`Sum` 为 `h1:W9T1KsbXwuVs3lHTNwSUcEBY0Ids00hUH7I9KuBtCEo=` |
-| 两个消费者对 `v0.1.0-rc.2` 重跑合同 | 未开始；现有结果只覆盖 rc.1 |
-| TMS 消费者合同（`tests/bentocontract`） | 提交 `f8eb9c3` 锁定候选并建立 `TBC-01` 至 `TBC-05`，提交 `7661603` 补齐 PostgreSQL 迁移与 `TBC-06` 至 `TBC-08`；八个用例已在 PostgreSQL 16.14 上以 `-count=1` 全部通过 |
-| Parcel 消费者合同（`tests/bentocontract`，提交 `960a516`） | 锁定同一 checksum，`PBC-01`、`PBC-05`、`PBC-06`、`PBC-08` 已在 PostgreSQL 16.14 上以 `-count=1` 全部通过 |
+| 两个消费者对 `v0.1.0-rc.2` 重跑合同 | 已完成，TMS 提交 `37d3209`、Parcel 提交 `1ce7c01` |
+| TMS 消费者合同（`tests/bentocontract`） | 提交 `f8eb9c3` 建立 `TBC-01` 至 `TBC-05`，`7661603` 补齐 `TBC-06` 至 `TBC-08`，`37d3209` 改锁 rc.2；八个用例在 PostgreSQL 16.14 上以 `-count=1` 全部通过 |
+| Parcel 消费者合同（`tests/bentocontract`） | 提交 `960a516` 建立合同，`1ce7c01` 改锁 rc.2；`PBC-01`、`PBC-05`、`PBC-06`、`PBC-08` 在 PostgreSQL 16.14 上以 `-count=1` 全部通过 |
 | 受保护候选 workflow、App、证明存储与 provenance（`B-05`） | 未绑定 |
 | `proofcheck` / `evidencecheck`、WORM Compliance Lock 与 DSSE 回执 | 未执行 |
 | 24 小时冷静期与新 CI run 复验 | 未开始 |
 
 因此当前有两个不可变候选，没有稳定版本。`v0.1.0-rc.1` 与 `v0.1.0-rc.2` 都不得被描述为已发布 `v0.x`，其消费者合同结果也不得替代受保护 CI 证明。后续候选必须继续使用 `-baseline`，不得再使用 `-initial-v0-1`。
 
-稳定版本必须指向两个消费者真正验证过的那个候选提交。现有合同结果绑定在 `v0.1.0-rc.1`（`af68525`）上，若以 `v0.1.0-rc.2`（`56322dc`）为发布目标，两侧必须先重新锁定 rc.2 并重跑合同。
+稳定版本必须指向两个消费者真正验证过的那个候选提交。当前两侧的合同结果都绑定在 `v0.1.0-rc.2`（`56322dc`）上；`v0.1.0-rc.1` 保留为历史候选，不再有对应的现行消费证明。此后每创建一个新候选，都必须由两侧重新锁定并重跑，不得沿用前一候选的结果。

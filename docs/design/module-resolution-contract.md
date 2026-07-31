@@ -111,9 +111,9 @@
 
 跳过行为本身受门禁保护：`internal/platform/pgtest` 在 `CI` 已设置而 `IDP_PARCEL_POSTGRES_DSN` 缺失时直接失败，只有本地开发环境才降级为 `t.Skip`。因此受保护 CI 中不存在"集成子用例被跳过但进程报 `PASS`"的路径。
 
-两侧合同验证的是 `v0.1.0-rc.1`。`v0.1.0-rc.2` 创建后，TMS 与 Parcel 必须重新锁定 rc.2 并重跑合同，否则消费证明与目标候选不对应；稳定版本只能指向两侧真正验证过的那个候选提交。
+`v0.1.0-rc.2` 创建后，两侧已重新锁定新候选并重跑合同，不沿用 rc.1 的结果。`idp-tms` 在提交 `37d3209`、`idp-parcel` 在提交 `1ce7c01` 把候选身份常量、module 锁和 checksum 更新为 rc.2，`go mod tidy -diff` 干净且 `go.sum` 不再保留 rc.1 条目；`TBC-01` 至 `TBC-08` 与 `PBC-01`、`PBC-05`、`PBC-06`、`PBC-08` 在 PostgreSQL 16.14 上以 `-count=1` 全部通过，无跳过用例。
 
-第 5 项剩余的是两侧对目标候选重跑合同并按[双消费者候选合同证明格式](./consumer-proof-format.md)产出正式证明文件，第 6 项受保护证据作业未开始，`B-01B` 尚未整体升级为 `BOUND`。
+第 5 项剩余的是两侧按[双消费者候选合同证明格式](./consumer-proof-format.md)产出正式证明文件，第 6 项受保护证据作业未开始，`B-01B` 尚未整体升级为 `BOUND`。
 
 ## 失败关闭规则
 
@@ -141,4 +141,4 @@
 
 Google 公共 DNS-over-HTTPS 返回 `go.idp.xyz A 8.133.22.7`；HTTP 请求 `301` 到同路径 HTTPS；Let's Encrypt ECDSA 证书 SAN 为 `go.idp.xyz`，有效期为 2026-07-31 至 2026-10-29。certbot `4.0.0` 使用现有账户和 `/var/www/certbot` webroot，`certbot.timer` 与现有 deploy hook 负责续期和 Nginx reload。module 根路径、`domain` 和 `postgres/outbox` 子路径已验证为 `200` 且唯一 metadata 精确匹配本合同。
 
-当前剩余阻断不再是 DNS、TLS、metadata 服务、不可变 RC、私有 Git 读取身份或空缓存下载——这些在 rc.1 与 rc.2 上都已通过实际验收并可复现——而是两侧对 `v0.1.0-rc.2` 重跑合同、产出正式证明文件和受保护证据作业。不得把当前可移动的 `main` 提交当作候选基线。
+当前剩余阻断不再是 DNS、TLS、metadata 服务、不可变 RC、私有 Git 读取身份或空缓存下载——这些在 rc.1 与 rc.2 上都已通过实际验收并可复现——而是两侧产出正式证明文件和受保护证据作业。不得把当前可移动的 `main` 提交当作候选基线。
