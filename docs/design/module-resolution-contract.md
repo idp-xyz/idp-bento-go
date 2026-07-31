@@ -93,11 +93,27 @@
 
 一次早期尝试因作业环境设置 `GOSUMDB=off` 而失败：工具链模块 `golang.org/toolchain@v0.0.1-go1.26.5.linux-amd64` 报 `verifying module: checksum database disabled by GOSUMDB=off`。该失败属于验收环境配置错误，不是解析或凭据缺陷，处置方式是改用 `GOPRIVATE` 而非全局关闭校验。
 
+2026-07-31 创建第二个不可变候选 `v0.1.0-rc.2` 后，在同样的隔离环境中重复第 3、4 项验收：
+
+| 字段 | 值 |
+| --- | --- |
+| `Path` | `go.idp.xyz/idp-bento-go` |
+| `Version` | `v0.1.0-rc.2` |
+| `Sum` | `h1:W9T1KsbXwuVs3lHTNwSUcEBY0Ids00hUH7I9KuBtCEo=` |
+| `GoModSum` | `h1:RFR6ylLNIIA7e4PPGVCzojYiH6DB8eHd2s5vI9XcUgY=` |
+| `Origin.URL` | `https://github.com/idp-xyz/idp-bento-go.git` |
+| `Origin.Ref` | `refs/tags/v0.1.0-rc.2` |
+| `Origin.Hash` | `56322dc25373b872ab5c49a74c0d544d7c088184` |
+
+`GoModSum` 与 `v0.1.0-rc.1` 相同，因为 `go.mod` 未变；`Sum` 不同，因为 zip 内容包含了 rc.1 之后的文档改动。两个候选的 `Sum` 必须保持不同，任何一个版本产生与本文记录不同的 `Sum` 都按发布安全事件处理。
+
 第 5 项两侧合同作业都已建立并在真实 PostgreSQL 16 上完整执行。`idp-tms` 在提交 `f8eb9c3` 锁定该精确候选并建立 `TBC-01` 至 `TBC-05`，在提交 `7661603` 补齐 PostgreSQL 迁移与集成门禁 `TBC-06` 至 `TBC-08`；`tests/bentocontract` 从正式 module path 编译并比对 checksum，八个用例在 PostgreSQL 16.14 上以 `-count=1` 全部通过。`idp-parcel` 在提交 `960a516` 锁定同一候选，`go.sum` 记录的 `h1:` 与 `/go.mod h1:` 与本文表格逐字一致；`PBC-01`、`PBC-05`、`PBC-06`、`PBC-08` 在 PostgreSQL 16.14 上以 `-count=1` 全部通过，其中 `PBC-06` 的 5 个 Outbox 与 5 个 Inbox 子用例、`PBC-08` 的事务边界断言均真实执行而非跳过。
 
 跳过行为本身受门禁保护：`internal/platform/pgtest` 在 `CI` 已设置而 `IDP_PARCEL_POSTGRES_DSN` 缺失时直接失败，只有本地开发环境才降级为 `t.Skip`。因此受保护 CI 中不存在"集成子用例被跳过但进程报 `PASS`"的路径。
 
-第 5 项剩余的是两侧按[双消费者候选合同证明格式](./consumer-proof-format.md)产出正式证明文件，第 6 项受保护证据作业未开始，`B-01B` 尚未整体升级为 `BOUND`。
+两侧合同验证的是 `v0.1.0-rc.1`。`v0.1.0-rc.2` 创建后，TMS 与 Parcel 必须重新锁定 rc.2 并重跑合同，否则消费证明与目标候选不对应；稳定版本只能指向两侧真正验证过的那个候选提交。
+
+第 5 项剩余的是两侧对目标候选重跑合同并按[双消费者候选合同证明格式](./consumer-proof-format.md)产出正式证明文件，第 6 项受保护证据作业未开始，`B-01B` 尚未整体升级为 `BOUND`。
 
 ## 失败关闭规则
 
@@ -119,10 +135,10 @@
 
 解析方式、精确元数据和验收标准已经确认。2026-07-30 创建公司 Organization `idp-xyz` 并将仓库迁移到私有仓库 `https://github.com/idp-xyz/idp-bento-go`；repository ID 保持 `1315735832`，owner ID 变为 `311024230`，旧 URL 自动重定向。
 
-2026-07-31 创建首个不可变候选 tag `v0.1.0-rc.1`，指向提交 `af68525c1d08fccae13eccd01f209465959673d6`。该 tag 不得移动或删除；同一版本产生不同 checksum 按发布安全事件处理。
+2026-07-31 创建首个不可变候选 tag `v0.1.0-rc.1`，指向提交 `af68525c1d08fccae13eccd01f209465959673d6`；同日创建第二个不可变候选 tag `v0.1.0-rc.2`，指向提交 `56322dc25373b872ab5c49a74c0d544d7c088184`。rc.2 通过 `candidatecheck -baseline <rc.1 api>` 的 19 个门禁，`compatcheck` 判定不可变旧基线与候选兼容且未变化，两个候选的公共 API 一致。两个 tag 都不得移动或删除；同一版本产生不同 checksum 按发布安全事件处理。
 
 2026-07-31 已在 `8.133.22.7` 完成实际部署：宿主 Nginx 独占 80/443 和 TLS，反向代理到只绑定 `127.0.0.1:8188` 的 `idp-bento-go-vanity` 容器；容器以 `101:101` 非 root 身份运行，根文件系统只读、删除全部 capabilities 且不含 GitHub 凭据。运行镜像 ID 为 `sha256:1cd9d483d3a89dca40fc492211d94fadbc7f22cc49c8a6d467120d34ccb29a27`，基础镜像固定为官方 `nginx@sha256:7068961d45b07b2af510ac002e9daa63a1d3eba2111202d6768798690800fffd`。部署材料位于 `infra/vanity/`。
 
 Google 公共 DNS-over-HTTPS 返回 `go.idp.xyz A 8.133.22.7`；HTTP 请求 `301` 到同路径 HTTPS；Let's Encrypt ECDSA 证书 SAN 为 `go.idp.xyz`，有效期为 2026-07-31 至 2026-10-29。certbot `4.0.0` 使用现有账户和 `/var/www/certbot` webroot，`certbot.timer` 与现有 deploy hook 负责续期和 Nginx reload。module 根路径、`domain` 和 `postgres/outbox` 子路径已验证为 `200` 且唯一 metadata 精确匹配本合同。
 
-当前剩余阻断不再是 DNS、TLS、metadata 服务、不可变 RC、私有 Git 读取身份、空缓存下载或两侧合同执行——第 1 至 5 项的执行部分已经通过实际验收并可复现——而是两侧的正式证明文件和受保护证据作业。不得把当前可移动的 `main` 提交当作候选基线。
+当前剩余阻断不再是 DNS、TLS、metadata 服务、不可变 RC、私有 Git 读取身份或空缓存下载——这些在 rc.1 与 rc.2 上都已通过实际验收并可复现——而是两侧对 `v0.1.0-rc.2` 重跑合同、产出正式证明文件和受保护证据作业。不得把当前可移动的 `main` 提交当作候选基线。

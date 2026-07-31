@@ -78,15 +78,19 @@ go run ./internal/cmd/candidatecheck -baseline D:\artifacts\idp-bento-go\<前序
 
 2026-07-31，`main` HEAD `af68525` 上的基础 `Framework CI` run `30616180483` 使用 PostgreSQL 16.12 通过 `-initial-v0-1` 的全部 18 个门禁，本地在 PostgreSQL 16.14 上复验同样通过。该 run 来自未受 Ruleset 保护的 `main` push，只证明基础 CI 可执行，不等于受保护 CI 候选证明。
 
-同日在该提交上创建首个不可变候选 tag `v0.1.0-rc.1`。它的唯一用途是让 TMS 与 Parcel 锁定精确版本并运行消费者合同：
+同日在该提交上创建首个不可变候选 tag `v0.1.0-rc.1`，随后在 `56322dc25373b872ab5c49a74c0d544d7c088184` 上创建第二个不可变候选 `v0.1.0-rc.2`。rc.2 使用 `-baseline` 模式通过 19 个门禁，`compatcheck` 判定与 rc.1 的不可变 `api/` 基线兼容且未变化。候选的唯一用途是让 TMS 与 Parcel 锁定精确版本并运行消费者合同：
 
 | 项目 | 状态 |
 | --- | --- |
 | `v0.1.0-rc.1` tag 与空缓存下载证明 | 已完成，见[module 解析与 vanity 合同](./module-resolution-contract.md) |
+| `v0.1.0-rc.2` tag 与空缓存下载证明 | 已完成，`Sum` 为 `h1:W9T1KsbXwuVs3lHTNwSUcEBY0Ids00hUH7I9KuBtCEo=` |
+| 两个消费者对 `v0.1.0-rc.2` 重跑合同 | 未开始；现有结果只覆盖 rc.1 |
 | TMS 消费者合同（`tests/bentocontract`） | 提交 `f8eb9c3` 锁定候选并建立 `TBC-01` 至 `TBC-05`，提交 `7661603` 补齐 PostgreSQL 迁移与 `TBC-06` 至 `TBC-08`；八个用例已在 PostgreSQL 16.14 上以 `-count=1` 全部通过 |
 | Parcel 消费者合同（`tests/bentocontract`，提交 `960a516`） | 锁定同一 checksum，`PBC-01`、`PBC-05`、`PBC-06`、`PBC-08` 已在 PostgreSQL 16.14 上以 `-count=1` 全部通过 |
 | 受保护候选 workflow、App、证明存储与 provenance（`B-05`） | 未绑定 |
 | `proofcheck` / `evidencecheck`、WORM Compliance Lock 与 DSSE 回执 | 未执行 |
 | 24 小时冷静期与新 CI run 复验 | 未开始 |
 
-因此当前只有一个不可变候选，没有稳定版本。`v0.1.0-rc.1` 不得被描述为已发布 `v0.x`，其消费者合同结果也不得替代受保护 CI 证明。后续候选必须改用 `-baseline`，不得再使用 `-initial-v0-1`。
+因此当前有两个不可变候选，没有稳定版本。`v0.1.0-rc.1` 与 `v0.1.0-rc.2` 都不得被描述为已发布 `v0.x`，其消费者合同结果也不得替代受保护 CI 证明。后续候选必须继续使用 `-baseline`，不得再使用 `-initial-v0-1`。
+
+稳定版本必须指向两个消费者真正验证过的那个候选提交。现有合同结果绑定在 `v0.1.0-rc.1`（`af68525`）上，若以 `v0.1.0-rc.2`（`56322dc`）为发布目标，两侧必须先重新锁定 rc.2 并重跑合同。
