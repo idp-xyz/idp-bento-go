@@ -83,7 +83,7 @@ Audit date: 2026-07-31
 | ID | 项目 | 何时必须绑定 | 当前状态 |
 | --- | --- | --- | --- |
 | `B-01A` | 正式 Go module path | 创建 `go.mod` 前 | `BOUND`：`go.idp.xyz/idp-bento-go`；不再阻断本地代码脚手架 |
-| `B-01B` | 实际 Git 地址及 `go.idp.xyz` 的 vanity metadata 或私有 GOPROXY 路由 | 首次跨仓获取候选前 | `CONFIGURATION BOUND / DEPLOYMENT UNVERIFIED`：Git 仓库为 `https://github.com/idp-xyz/idp-bento-go`；`v0.1` 使用 HTTPS vanity metadata 直连该仓库，不引入私有 GOPROXY；2026-07-31 Google 公共 DNS-over-HTTPS 仍返回 `NXDOMAIN`，本地测试网段地址与失败 TLS 握手不构成证据，TLS/元数据和空缓存真实 RC 下载尚不可执行 |
+| `B-01B` | 实际 Git 地址及 `go.idp.xyz` 的 vanity metadata 或私有 GOPROXY 路由 | 首次跨仓获取候选前 | `CONFIGURATION BOUND / DEPLOYMENT UNVERIFIED`：Git 仓库为 `https://github.com/idp-xyz/idp-bento-go`；`v0.1` 使用 HTTPS vanity metadata 直连该仓库，不引入私有 GOPROXY；最新 Google 公共 DNS-over-HTTPS 已返回 `go.idp.xyz A 8.133.22.7`，但 80/443 在 HTTP/TLS 握手阶段主动关闭，尚无可验证 metadata，空缓存真实 RC 下载仍不可执行 |
 | `B-02` | 精确 Go、`pgx/v5`、OpenTelemetry、apidiff 与 SemVer 解析版本 | 创建代码基线与依赖锁时 | `BOUND`：Go `1.26.5`、pgx `v5.10.0`、OpenTelemetry API `v1.44.0`、`x/exp v0.0.0-20260727155853-b88d891fe743`、`x/mod v0.38.0`；2026-07-29 由官方端点核验，`x/mod` 原已由工具链间接锁定，现由证明校验直接使用 |
 | `B-03` | PostgreSQL 验证主版本范围 | 首个适配器集成测试前 | `BOUND`：`v0.1` 初始支持 major 16；CI 使用最新稳定 16.x，当前证据为 16.12 |
 | `B-04` | 维护者、消费者代表、安全批准者账号 | 开放共享合并与发布候选前 | `UNBOUND IDENTITIES`：公司 Organization `idp-xyz` 已绑定，但真实维护者、消费者代表和安全批准者账号尚未绑定 |
@@ -123,6 +123,7 @@ Audit date: 2026-07-31
 - 2026-07-30 将仓库切换为私有，保留远端 Boost Software License 1.0 初始提交，并把通过本地门禁的 113 个源码与文档文件推送到 `main`；远端提交更新为 `6da1e17e74eeecc9ec120d646642f2f303f4ccbd`。同日使用一次性 PostgreSQL 16.9 容器通过 `candidatecheck -initial-v0-1` 的全部 18 个门禁。Ruleset 页面明确提示免费 Organization 不执行私有仓库规则；Team 升级停在账单资料和付款之前，因此不得把默认分支描述为已保护。
 - 2026-07-31 部署基础 `Framework CI`，固定第三方 Action 完整 SHA、Go 1.26.5 与 PostgreSQL 16.12 manifest digest。首次 run `30560728007` 暴露 Windows 生成的 `testkit` export data 与 Linux runner 不一致；提交 `c780c14212aa9ebd367fb9b0379e7d9562360f5a` 将 snapshot 生成和当前包加载统一到 `linux/amd64`、`CGO_ENABLED=0`，run `30563832922` 随后通过全部 18 个门禁。用户确认保持 GitHub Free、不购买 Team；该 CI 未受 Ruleset 保护，不能授权 RC 或稳定发布。
 - 2026-07-31 通过 Google 公共 DNS-over-HTTPS 对 `go.idp.xyz` 做只读交叉核验，返回 `Status: 3 (NXDOMAIN)`；本地解析器返回 `198.18.0.125` 且 HTTPS TLS 握手失败，判定为环境/测试网段结果，不能升级 `B-01B`。下一动作属于域名/平台维护方：部署有效 DNS、公开 TLS 和精确 `go-import` 元数据后，按合同执行空缓存 RC 下载验收。
+- 2026-07-31 后续核验发现公共 DNS 已传播 `go.idp.xyz A 8.133.22.7`，且 80/443 TCP 端口可达，但 HTTP 请求和 TLS 握手均被服务器主动关闭；DNS 已有记录，Web/vanity 服务仍未部署。下一动作属于域名/平台维护方：在该现有服务上配置有效 TLS 和精确 `go-import` 元数据后，按合同执行空缓存 RC 下载验收。
 
 ## 推荐完成顺序
 
