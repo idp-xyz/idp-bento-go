@@ -61,7 +61,7 @@
 
 `F-40` 的外部 Git transport 已于 2026-07-30 最终绑定为 `https://github.com/idp-xyz/idp-bento-go`；仓库从个人命名空间迁移到公司 Organization 时 repository ID 保持不变，且该迁移不改变 ADR-0008 已接受的模块身份解耦决定。
 
-`F-40` 的 `v0.1` 解析方式随后确认使用 HTTPS vanity metadata 直连该 GitHub 仓库，不引入私有 GOPROXY；精确响应与验收见 [`go.idp.xyz` module 解析合同](./module-resolution-contract.md)。DNS、TLS 和真实 RC 空缓存下载尚未验证，因此该外部门禁仍未解除。
+`F-40` 的 `v0.1` 解析方式随后确认使用 HTTPS vanity metadata 直连该 GitHub 仓库，不引入私有 GOPROXY；精确响应与验收见 [`go.idp.xyz` module 解析合同](./module-resolution-contract.md)。DNS、TLS 和 `v0.1.0-rc.1` 的空缓存真实下载已经验证，但 Parcel 侧消费证明和受保护证据作业尚未完成，因此该外部门禁仍未整体解除。
 
 ## 已确认框架范围
 

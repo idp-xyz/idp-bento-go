@@ -1,6 +1,6 @@
 # `go.idp.xyz` module 解析合同
 
-状态：设计已确认；DNS、TLS 与 metadata 部署已验证；真实 RC 获取未验证
+状态：设计已确认；DNS、TLS 与 metadata 部署已验证；真实 RC 空缓存获取已验收并可复现；双消费者证明与受保护证据未完成
 
 日期：2026-07-31
 
@@ -52,16 +52,17 @@
 如果 GitHub 仓库需要认证，vanity 页面仍不承载 Git 凭据。CI 在 Git 访问层使用 `B-05` 后续绑定的短期最小权限凭据，并遵守：
 
 - `GOPRIVATE=go.idp.xyz`，避免把私有 module 路径、版本和校验查询发送到公共 GOPROXY 或公共 checksum database。
-- 隔离验收作业显式使用 `GOPROXY=direct` 和 `GONOSUMDB=go.idp.xyz`；消费者普通构建可保留组织级 GOPROXY，同时让 `GOPRIVATE` 对本 module 走直连。
+- 隔离验收作业显式使用 `GOPROXY=direct`；`GOPRIVATE=go.idp.xyz` 已同时派生本 prefix 的 `GONOPROXY` 与 `GONOSUMDB`，消费者普通构建可保留组织级 GOPROXY，同时让 `GOPRIVATE` 对本 module 走直连。
+- 不得用 `GOSUMDB=off` 或 `GOFLAGS=-mod=mod` 之类的全局开关代替 `GOPRIVATE`。全局关闭 checksum database 会一并放弃公共依赖和 `golang.org/toolchain` 的校验，属于供应链降级；空缓存验收作业必须保留默认 `GOSUMDB=sum.golang.org`。
 - `GIT_TERMINAL_PROMPT=0`，缺少凭据时立即失败，不能等待交互输入。
 - 凭据不得写入 clone URL、`go.env`、仓库文件、构建参数、日志、module cache 制品或最终镜像层。
-- 不使用带明文 token 的全局 Git `insteadOf` 配置；凭据载体、轮换、撤销和审计由 `B-05` 绑定。
+- 不使用带明文 token 的全局 Git `insteadOf` 配置；凭据只能经 Git credential helper 在请求时提供。凭据载体、轮换、撤销和审计由 `B-05` 绑定。
 
 仓库公开或私有的实际策略由 GitHub 仓库设置决定；本文不根据 URL 推断可见性，也不把“私有化交付”等同于“公开源码仓库”。
 
 ## 首次 RC 验收
 
-`B-01B` 只有在以下证据全部存在后才能从“配置已确认、部署未验证”改为 `BOUND`：
+`B-01B` 只有在以下证据全部存在后才能改为 `BOUND`：
 
 1. DNS 将 `go.idp.xyz` 解析到公司控制的服务，TLS 证书有效且自动续期责任明确。
 2. module 根路径和至少一个真实公共包子路径的 `?go-get=1` 响应满足上述精确元数据合同。
@@ -87,6 +88,10 @@
 | `Origin.URL` | `https://github.com/idp-xyz/idp-bento-go.git` |
 | `Origin.Ref` | `refs/tags/v0.1.0-rc.1` |
 | `Origin.Hash` | `af68525c1d08fccae13eccd01f209465959673d6` |
+
+同日在独立临时 `HOME`、全新空 `GOMODCACHE`/`GOCACHE`、临时空 main module（无 `require`、无 `replace`）中复跑该命令，返回完全相同的 `Sum`、`GoModSum`、`Origin.URL`、`Origin.Ref` 和 `Origin.Hash`，证明 tag 未被移动且同一版本产生同一 checksum。该次复跑保留默认 `GOSUMDB=sum.golang.org`，仅用 `GOPRIVATE=go.idp.xyz` 让本 module 跳过公共 proxy 与 checksum database；`GOTOOLCHAIN=go1.26.5` 在同一空缓存中下载并通过 checksum database 校验 `golang.org/toolchain@v0.0.1-go1.26.5.linux-amd64`。Git 读取身份只经 credential helper 在请求时提供，验收环境不含带明文 token 的 `insteadOf` 配置。`-x` 输出确认解析路径为 `https://go.idp.xyz/idp-bento-go?go-get=1` 返回 `200` 后直连 `https://github.com/idp-xyz/idp-bento-go.git` 并只 fetch `refs/tags/v0.1.0-rc.1`。
+
+一次早期尝试因作业环境设置 `GOSUMDB=off` 而失败：工具链模块 `golang.org/toolchain@v0.0.1-go1.26.5.linux-amd64` 报 `verifying module: checksum database disabled by GOSUMDB=off`。该失败属于验收环境配置错误，不是解析或凭据缺陷，处置方式是改用 `GOPRIVATE` 而非全局关闭校验。
 
 第 5 项已由 TMS 单侧满足：`idp-tms` 在提交 `f8eb9c3` 锁定该精确候选，`tests/bentocontract` 从正式 module path 编译并比对 checksum 通过。Parcel 侧合同作业尚未建立，因此第 5 项整体未完成，第 6 项也未开始，`B-01B` 尚未整体升级为 `BOUND`。
 
@@ -116,4 +121,4 @@
 
 Google 公共 DNS-over-HTTPS 返回 `go.idp.xyz A 8.133.22.7`；HTTP 请求 `301` 到同路径 HTTPS；Let's Encrypt ECDSA 证书 SAN 为 `go.idp.xyz`，有效期为 2026-07-31 至 2026-10-29。certbot `4.0.0` 使用现有账户和 `/var/www/certbot` webroot，`certbot.timer` 与现有 deploy hook 负责续期和 Nginx reload。module 根路径、`domain` 和 `postgres/outbox` 子路径已验证为 `200` 且唯一 metadata 精确匹配本合同。
 
-当前剩余阻断不再是 DNS、TLS 或 metadata 服务，而是真实不可变 RC、私有 Git 读取身份、空缓存下载、TMS/Parcel 消费证明和受保护证据作业。不得把当前可移动的 `main` 提交当作候选基线。
+当前剩余阻断不再是 DNS、TLS、metadata 服务、不可变 RC、私有 Git 读取身份或空缓存下载——第 1 至 4 项已经通过实际验收并可复现——而是 Parcel 侧消费证明和受保护证据作业。不得把当前可移动的 `main` 提交当作候选基线。

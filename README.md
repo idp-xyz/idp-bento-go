@@ -98,4 +98,4 @@
 - [`v0.1` 最终实施决策简报](./docs/design/v0.1-implementation-decision-brief.md)
 - [ADR 索引](./docs/adr/README.md)
 
-`R-01` 至 `R-06` 的公共设计合同和本地代码基线均已实现，PostgreSQL 16.12 仓库内验收已通过。下一阶段是部署并验证 `B-01B` 的 vanity 解析、绑定 `B-04` 至 `B-06`，建立受保护 CI 与不可变 RC，再收集 TMS、Parcel 对同一候选 checksum 的合同证明。
+`R-01` 至 `R-06` 的公共设计合同和本地代码基线均已实现，PostgreSQL 16.12 仓库内验收已通过，`B-01B` 的 vanity 解析与 `v0.1.0-rc.1` 空缓存真实获取已验收，TMS 侧消费者合同已通过。下一阶段是建立 Parcel 侧合同作业、绑定 `B-04` 至 `B-06`，建立受保护 CI 与受保护 RC，再收集 TMS、Parcel 对同一候选 checksum 的合同证明。

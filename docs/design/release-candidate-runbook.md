@@ -8,7 +8,7 @@
 
 `internal/cmd/candidatecheck` 是平台无关的候选前置门禁入口。它把已经确认的 Go 工具链、公共兼容性、架构依赖、静态分析和 PostgreSQL 真实测试收敛为一个失败即停止的命令，供未来受保护 CI 直接调用。
 
-该命令不创建 tag、module、RC、provenance 或消费者合同证明，也不访问 TMS/Parcel。运行成功只表示当前 checkout 具备进入不可变 RC 创建流程的仓内条件；实际 Git 仓库和 vanity 解析合同虽已绑定，`B-01B` 剩余的线上部署验收、`B-04` 至 `B-06` 和双消费者合同仍分别阻断跨仓获取、发布权限、CI 证明与稳定版本。
+该命令不创建 tag、module、RC、provenance 或消费者合同证明，也不访问 TMS/Parcel。运行成功只表示当前 checkout 具备进入不可变 RC 创建流程的仓内条件；实际 Git 仓库、vanity 解析和 `v0.1.0-rc.1` 的空缓存获取虽已验收，`B-01B` 剩余的 Parcel 消费证明与受保护证据作业、`B-04` 至 `B-06` 和双消费者合同仍分别阻断双消费者结论、发布权限、CI 证明与稳定版本。
 
 ## 必需输入
 
@@ -61,7 +61,7 @@ go run ./internal/cmd/candidatecheck -baseline D:\artifacts\idp-bento-go\<前序
 - Go 版本、module identity、module 文件、格式、snapshot、manifest、依赖图或 apidiff 漂移：阻断 RC。
 - PostgreSQL DSN 缺失、数据库不可达、版本不是 major 16 或任一 `I-04` 用例失败：阻断 RC。
 - 对非初始候选无法取得不可变旧 `api/` 基线：阻断 RC，不允许改用 `-initial-v0-1`。
-- 命令成功但 `B-01B` 的 vanity 解析尚未通过线上验收、`B-04` 未绑定或 `B-05` 未完全绑定：仍不得创建远端 RC。
+- 命令成功但 `B-01B` 的空缓存获取验收在目标候选上未复现、`B-04` 未绑定或 `B-05` 未完全绑定：仍不得创建受保护远端 RC。
 - 任一 TMS/Parcel 结果失败、缺失、超时或 module checksum 不同：可以创建修复用下一 RC，但不得创建稳定 tag。
 
 ## CI 证据边界
