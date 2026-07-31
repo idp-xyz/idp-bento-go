@@ -12,7 +12,8 @@
 - 已实现 `postgres`、`postgres/outbox`、`postgres/inbox`、不可变迁移、只读 `CheckSchema`、PostgreSQL 编译夹具和真实端口集成测试。
 - 已建立八个公共包的无本机绝对路径 `.apidiff` 快照、两个编译夹具，以及 132-case 的 Envelope v1 行为清单。
 - 仓库内 `I-04` 矩阵已在 PostgreSQL 16.12 上通过；2026-07-31，基础 GitHub Actions `Framework CI` 又在 PostgreSQL 16.12 上通过 `candidatecheck -initial-v0-1` 的全部 18 个门禁（run `30563832922`）。该 workflow 未受 Ruleset 保护，只是开发反馈，不是 RC 或稳定发布授权。
-- 私有远端仓库已经接收完整源码，`main` 当前指向 `c780c14212aa9ebd367fb9b0379e7d9562360f5a`。当前明确保持 GitHub Free，不购买 Team；免费 Organization 不执行私有仓库 Ruleset，因此受保护默认分支、解析基础设施、维护者身份、RC 和 TMS/Parcel 同一候选合同尚未完成，当前仍不是稳定版本发布完成。Team 或等价受保护平台只需在开放共享合并或首个 RC 前选择。
+- 私有远端仓库已经接收完整源码；`go.idp.xyz` 解析基础设施、不可变候选 `v0.1.0-rc.1` 及其空缓存真实获取、TMS 与 Parcel 对同一候选的合同执行均已验收。
+- 当前明确保持 GitHub Free，不购买 Team；免费 Organization 不执行私有仓库 Ruleset，因此受保护默认分支、维护者身份、受保护 RC 和两侧正式合同证明尚未完成，当前仍不是稳定版本发布完成。Team 或等价受保护平台只需在开放共享合并或首个受保护 RC 前选择。
 
 ## 已确认基线
 
@@ -98,4 +99,4 @@
 - [`v0.1` 最终实施决策简报](./docs/design/v0.1-implementation-decision-brief.md)
 - [ADR 索引](./docs/adr/README.md)
 
-`R-01` 至 `R-06` 的公共设计合同和本地代码基线均已实现，PostgreSQL 16.12 仓库内验收已通过，`B-01B` 的 vanity 解析与 `v0.1.0-rc.1` 空缓存真实获取已验收，TMS 侧消费者合同已通过。下一阶段是建立 Parcel 侧合同作业、绑定 `B-04` 至 `B-06`，建立受保护 CI 与受保护 RC，再收集 TMS、Parcel 对同一候选 checksum 的合同证明。
+`R-01` 至 `R-06` 的公共设计合同和本地代码基线均已实现，PostgreSQL 16.12 仓库内验收已通过，`B-01B` 的 vanity 解析与 `v0.1.0-rc.1` 空缓存真实获取已验收，TMS 与 Parcel 都已锁定同一候选 checksum，两侧合同作业均已在真实 PostgreSQL 16 上执行通过。下一阶段是绑定 `B-04` 至 `B-06`，建立受保护 CI 与受保护 RC，再收集两个消费者的正式合同证明。

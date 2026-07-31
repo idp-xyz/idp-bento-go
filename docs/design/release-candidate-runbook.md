@@ -8,7 +8,7 @@
 
 `internal/cmd/candidatecheck` 是平台无关的候选前置门禁入口。它把已经确认的 Go 工具链、公共兼容性、架构依赖、静态分析和 PostgreSQL 真实测试收敛为一个失败即停止的命令，供未来受保护 CI 直接调用。
 
-该命令不创建 tag、module、RC、provenance 或消费者合同证明，也不访问 TMS/Parcel。运行成功只表示当前 checkout 具备进入不可变 RC 创建流程的仓内条件；实际 Git 仓库、vanity 解析和 `v0.1.0-rc.1` 的空缓存获取虽已验收，`B-01B` 剩余的 Parcel 消费证明与受保护证据作业、`B-04` 至 `B-06` 和双消费者合同仍分别阻断双消费者结论、发布权限、CI 证明与稳定版本。
+该命令不创建 tag、module、RC、provenance 或消费者合同证明，也不访问 TMS/Parcel。运行成功只表示当前 checkout 具备进入不可变 RC 创建流程的仓内条件；实际 Git 仓库、vanity 解析和 `v0.1.0-rc.1` 的空缓存获取虽已验收，`B-01B` 剩余的两侧正式证明文件与受保护证据作业、`B-04` 至 `B-06` 仍分别阻断双消费者结论、发布权限、CI 证明与稳定版本。
 
 ## 必需输入
 
@@ -84,7 +84,7 @@ go run ./internal/cmd/candidatecheck -baseline D:\artifacts\idp-bento-go\<前序
 | --- | --- |
 | `v0.1.0-rc.1` tag 与空缓存下载证明 | 已完成，见[module 解析与 vanity 合同](./module-resolution-contract.md) |
 | TMS 消费者合同（`tests/bentocontract`，提交 `f8eb9c3`） | 已通过 TBC-01 至 TBC-05 |
-| Parcel 消费者合同 | 未建立 |
+| Parcel 消费者合同（`tests/bentocontract`，提交 `960a516`） | 已建立并锁定同一 checksum；`PBC-01`、`PBC-05` 通过，`PBC-06`、`PBC-08` 的 PostgreSQL 集成子用例因缺 `IDP_PARCEL_POSTGRES_DSN` 而跳过 |
 | 受保护候选 workflow、App、证明存储与 provenance（`B-05`） | 未绑定 |
 | `proofcheck` / `evidencecheck`、WORM Compliance Lock 与 DSSE 回执 | 未执行 |
 | 24 小时冷静期与新 CI run 复验 | 未开始 |

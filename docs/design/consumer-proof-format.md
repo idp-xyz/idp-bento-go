@@ -83,4 +83,4 @@ go run ./internal/cmd/proofcheck `
 
 ## 当前状态
 
-严格读取、checksum/SemVer/Git object ID、预期 TMS/Parcel 提交、双消费者同候选比较、失败结果、候选/合同错配、未知字段和尾随 JSON 负向测试已经实现。真实不可变候选 `v0.1.0-rc.1` 已经存在，TMS 已在提交 `f8eb9c3` 从正式 module path 通过合同作业；Parcel 侧合同作业和两侧的正式证明文件仍未产生，因此 `proofcheck` 尚未产生任何发布结论。
+严格读取、checksum/SemVer/Git object ID、预期 TMS/Parcel 提交、双消费者同候选比较、失败结果、候选/合同错配、未知字段和尾随 JSON 负向测试已经实现。真实不可变候选 `v0.1.0-rc.1` 已经存在，TMS 在提交 `f8eb9c3`、Parcel 在提交 `960a516` 都已从正式 module path 锁定同一 checksum，两侧合同作业均已在真实 PostgreSQL 16 上完整执行通过。两侧尚未按本文格式产出正式证明文件，因此 `proofcheck` 尚未产生任何发布结论。
