@@ -11,3 +11,5 @@
 - [ADR-0007：采用四层兼容性与双消费者发布门禁](./0007-compatibility-and-consumer-gates.md)
 - [ADR-0008：使用稳定 module path 解耦 Git transport](./0008-stable-module-path.md)
 - [ADR-0009：使用合规模式 WORM 与 OIDC 签名发布证据](./0009-worm-oidc-release-evidence.md)
+- [ADR-0010：接收编号原语、拒绝平台能力进入框架](./0010-numbering-primitives-platform-boundary.md)
+- [ADR-0011：编号原语撤出框架路线，随 idp-platform-go 立库落地](./0011-numbering-primitives-move-to-platform-go.md)

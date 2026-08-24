@@ -98,6 +98,7 @@
 - [可观测性边界](./docs/design/observability.md)
 - [实施就绪审计](./docs/design/implementation-readiness-audit.md)
 - [`v0.1` 最终实施决策简报](./docs/design/v0.1-implementation-decision-brief.md)
+- [`v0.2` 编号原语决策简报（已取代，见 ADR-0011）](./docs/design/v0.2-numbering-primitives-decision-brief.md)
 - [ADR 索引](./docs/adr/README.md)
 
 `R-01` 至 `R-06` 的公共设计合同和本地代码基线均已实现，PostgreSQL 16.12 仓库内验收已通过，`B-01B` 的 vanity 解析与 `v0.1.0-rc.1` 空缓存真实获取已验收，TMS 与 Parcel 都已锁定同一候选 checksum，两侧合同作业均已在真实 PostgreSQL 16 上执行通过。下一阶段是绑定 `B-04` 至 `B-06`，建立受保护 CI 与受保护 RC，再收集两个消费者的正式合同证明。
