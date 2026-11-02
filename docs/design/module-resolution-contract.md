@@ -142,3 +142,7 @@
 Google 公共 DNS-over-HTTPS 返回 `go.idp.xyz A 8.133.22.7`；HTTP 请求 `301` 到同路径 HTTPS；Let's Encrypt ECDSA 证书 SAN 为 `go.idp.xyz`，有效期为 2026-07-31 至 2026-10-29。certbot `4.0.0` 使用现有账户和 `/var/www/certbot` webroot，`certbot.timer` 与现有 deploy hook 负责续期和 Nginx reload。module 根路径、`domain` 和 `postgres/outbox` 子路径已验证为 `200` 且唯一 metadata 精确匹配本合同。
 
 当前剩余阻断不再是 DNS、TLS、metadata 服务、不可变 RC、私有 Git 读取身份或空缓存下载——这些在 rc.1 与 rc.2 上都已通过实际验收并可复现——而是证明的受信任来源和受保护证据作业。不得把当前可移动的 `main` 提交当作候选基线。
+
+## 补记：第二个 module（2026-11-02）
+
+`go.idp.xyz/idp-platform-go`（平台能力库，单据编号等）按本合同同一套规则解析：仓库 `https://github.com/idp-xyz/idp-platform-go`（2026-11-02 由 `idpxyz` 组织转入，旧地址自动重定向），根路径与任意包子路径返回且只返回 `<meta name="go-import" content="go.idp.xyz/idp-platform-go git https://github.com/idp-xyz/idp-platform-go.git">`；`idp-bento-go` 的元数据与行为不变。实现与验收见 `infra/vanity/`（镜像 `0.2.0`、`verify.sh`）。

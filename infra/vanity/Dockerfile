@@ -5,6 +5,7 @@ LABEL org.opencontainers.image.description="go.idp.xyz vanity metadata service"
 
 COPY --chown=101:101 nginx.conf /etc/nginx/nginx.conf
 COPY --chown=101:101 site/index.html /usr/share/nginx/html/index.html
+COPY --chown=101:101 site/idp-platform-go.html /usr/share/nginx/html/idp-platform-go.html
 
 USER 101:101
 EXPOSE 8080

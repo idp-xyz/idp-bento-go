@@ -2,7 +2,7 @@ name: goidpxyz
 
 services:
   vanity:
-    image: idp-bento-go-vanity:0.1.0
+    image: idp-bento-go-vanity:0.2.0
     build:
       context: .
       dockerfile: Dockerfile
@@ -26,6 +26,8 @@ services:
         - >-
           wget -qO- 'http://127.0.0.1:8080/idp-bento-go?go-get=1'
           | grep -Fq 'go.idp.xyz/idp-bento-go git https://github.com/idp-xyz/idp-bento-go.git'
+          && wget -qO- 'http://127.0.0.1:8080/idp-platform-go?go-get=1'
+          | grep -Fq 'go.idp.xyz/idp-platform-go git https://github.com/idp-xyz/idp-platform-go.git'
       interval: 10s
       timeout: 3s
       retries: 3
