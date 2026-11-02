@@ -13,6 +13,15 @@
 
 容器使用固定 digest 的官方 Nginx 镜像，以 UID/GID `101:101` 运行，根文件系统只读，删除全部 Linux capabilities，只绑定宿主回环地址。页面对 module 根路径和任意包子路径返回同一个唯一 `go-import` 元数据。
 
+当前服务两个 module：
+
+| module | 仓库 | 页面 |
+| --- | --- | --- |
+| `go.idp.xyz/idp-bento-go` | `https://github.com/idp-xyz/idp-bento-go.git` | `site/index.html`（未匹配任何 module 前缀的路径也落到这一页，保持既有行为） |
+| `go.idp.xyz/idp-platform-go` | `https://github.com/idp-xyz/idp-platform-go.git` | `site/idp-platform-go.html` |
+
+新增 module：在 `site/` 加一页（只含该 module 的一条 `go-import`），在 `nginx.conf` 加一条 `location ~ ^/<module>(/|$)`，在 `Dockerfile` 复制该页，在 `verify.sh` 与 `compose.yaml` 健康检查补上根路径与一个真实包子路径，镜像版本号加一。
+
 ## 文件
 
 - `Dockerfile`、`nginx.conf`、`site/index.html`：不可变 vanity 镜像。
